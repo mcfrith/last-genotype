@@ -1,0 +1,98 @@
+TEST last-sub -h
+Usage: last-sub [options] last-train.out alignments.maf
+
+Options:
+  -h, --help         show this help message and exit
+  -m INC, --min=INC  minimum increase in log10(likelihood) over homozygous
+                     reference (default=6)
+  -p N, --ploidy=N   1=haploid, 2=diploid, etc (default=2)
+
+TEST last-sub hs-rna.mat hs-rna.maf
+chr11	237086	A	GG	22	2.1	AG	0	0	A%~ A'~ A2~ G<~ G=~ G=~ G?~ G?~ G@~ G@~ G@~ g"~ g<~ g<~ g?~ g?~ g?~
+chr11	244166	C	TT	22	4.2	CT	0	0	T$c T(r T5c T5c T5c T6f T9~ T9~ T9~ T9~ T:~ t$Z t$Z t%~ t/b t;~ t;~
+chr11	244170	T	CC	25	4.3	CT	0	0	C&t C5~ C7u C7u C8u C9~ C9~ C9~ C9~ C9~ C:y T$h c)] c)] c/~ c:~ c:~
+chr11	244196	T	CC	29	4.3	CT	0	0	C)~ C?~ C?~ C?~ C?~ C?~ C?~ C?~ C?~ C?~ C?~ T'~ c@~ c@~ c@~ c@~ c@~
+chr11	252840	C	CT	13	0.64	TT	0	0	CN~ T-~ T2~ T9~ T:~ T>~ T>~ T>~ c*~ cF~ t-~ t.{ t=~ t>~
+chr11	308289	T	CC	11	1.9	CT	0	0	C%~ C/~ C>~ C>~ C?~ c?~ c@~
+chr11	308313	T	CC	14	2.3	CT	0	0	C0~ C7~ C9~ C<6 C<~ C=~ c=~ c>~
+chr11	308362	G	CC	14	2.5	CT	0	0	C*^ C2~ C2~ C36 C3~ C3~ C3~ c,~ c4~
+chr11	308425	G	CC	15	2.6	CT	0	0	C+q C3O C3[ C3] C3~ C66 C6~ c4~ c4~
+chr11	837581	G	AG	9	4.8	AA	0	0	A1~ A<~ A<~ AA~ GL~ GL~ G~~ a)~ a:~ a:~ a:~ g-~ gL~
+chr11	838418	A	GA	11	1.7	GG	12	9	AA~ AC~ G)~ G.~ G.~ G=~ G=~ G=~ aR~ g.~ g3~ g<~ g<~
+chr11	838423	C	TC	13	0.62	TT	13	13	C#~ C#~ C>~ T5~ T5~ T5~ T5~ T=~ c"~ c$~ c>~ t5~ t?~ t?~ t?~ t?~
+chr11	838541	C	TC	12	4.9	TT	14	15	C#~ C8~ CB~ T1~ T7~ T7~ T7~ T7~ c!~ cN~ cN~ cN~ t0~ t9~ t9~ t<~ t<~
+chr11	838633	C	GC	11	7	GG	14	13	CB~ CL~ C~~ G2~ G2~ G2~ G2~ G2~ c"~ cL~ g(~ g0~ g1~ g1~ g1~
+chr11	838671	C	TC	12	12	TT	16	15	C%~ CL~ CN~ CN~ C~~ T;~ T;~ T;~ T;~ T<~ T<~ cL~ cL~ cL~ cN~ c~~ t=~ t>~ t>~ t>~
+chr11	838721	T	TC	6.1	6.1	TT	21	19	C1~ C5~ C9~ C9~ T;~ T=~ TN~ TN~ T~~ T~~ T~~ c:~ c:~ c=~ tN~ tN~ tN~ tN~ tN~ t~~
+chr11	838759	T	AT	15	14	AC	29	20	A2~ A3~ A3~ A3~ A6~ A6~ G3~ T*[ T0~ TJ~ TN~ T~~ a+~ a2~ a2~ a3~ a3~ a3~ t3~ tL~ tN~ t~~
+chr11	840250	C	GG	2.3e+02	34	AG	0	0	A)~ A3~ A4~ A4~ A6~ A6~ A7~ C#~ C+o C.~ C2~ CE~ G"~ G"~ G)~ G-~ G.~ G0~ G1~ G1~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G6~ G7~ G7~ a%~ c)~ c+~ g#~ g(~ g)~ g.~ g/~ g/~ g0~ g0~ g0~ g0~ g0~ g0~ g0~ g0~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g6~ g6~ g6~ g6~ g6~ g6~ g6~
+chr11	840318	C	CT	1.4e+02	97	TT	0	0	C"~ C#~ C#~ C*~ C5~ C9~ C<~ C?~ CB~ CB~ CB~ CB~ CB~ CB~ CH~ CI~ CK~ CL~ CQ~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ C~~ C~~ C~~ C~~ C~~ C~~ C~~ C~~ C~~ C~~ C~~ C~~ T&~ T&~ T(~ T)~ T)~ T)~ T,~ T,~ T/~ T/~ T/~ T/~ T3~ T4~ T4~ T4~ T4~ T7~ T8~ T8~ T8~ T=~ T=~ T>~ T>~ T>~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ c"~ c'U c+~ c3~ c5~ c9~ c<~ c<~ cA~ cD~ cI~ cJ~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ t$~ t*~ t*~ t+~ t,~ t.~ t.~ t0~ t5~ t6~ t:~ t:~ t;~ t;~ t;~ t;~ t=~ t?~ t?~ t?~ t?~ t@~ t@~ t@~ t@~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~
+chr11	840476	A	AG	54	54	AA	1.7e+02	173	A%l A&` A'? A.{ A.{ A:` A:` A:` A:` A<~ A=c A?c A?c A?c A?c A?c A?~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ AEN AEN A~] A~` A~` A~b A~b A~c A~c A~c A~c A~~ A~~ A~~ G(J G(M G(M G)M G*P G+q G,J G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,d G,p G,p G,p G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,~ G-P G-P G-P G-P G-P G-P G-q G-q G-q G-q G-q G-q G-q G-q G-q G2P a%K a-O a.X a.{ a/Z a1& a2= a3~ a:` a:` a>Z a>Z a?Z a?Z a?Z a?c a?c a?c a?c a?c a?c a?~ a?~ a?~ a?~ a?~ a?~ a?~ a@c a@c aEN a~c a~c a~c a~c a~~ a~~ a~~ a~~ a~~ g'I g'L g'L g'L g'M g+F g+F g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+p g+p g+p g+p g+p g+p g+p g+q g,F g,O g,O g,O g,O g,O g,O g,O g,O g,_ g,p g,p g,~ g1; g1;
+# Tested sites: 20515
+
+TEST last-sub -m5 hs-rna.mat hs-rna.maf
+chr11	214543	C	TT	5.4	0.88	CT	0	0	T>~ tA~ tA~
+chr11	237086	A	GG	22	2.1	AG	0	0	A%~ A'~ A2~ G<~ G=~ G=~ G?~ G?~ G@~ G@~ G@~ g"~ g<~ g<~ g?~ g?~ g?~
+chr11	244166	C	TT	22	4.2	CT	0	0	T$c T(r T5c T5c T5c T6f T9~ T9~ T9~ T9~ T:~ t$Z t$Z t%~ t/b t;~ t;~
+chr11	244170	T	CC	25	4.3	CT	0	0	C&t C5~ C7u C7u C8u C9~ C9~ C9~ C9~ C9~ C:y T$h c)] c)] c/~ c:~ c:~
+chr11	244196	T	CC	29	4.3	CT	0	0	C)~ C?~ C?~ C?~ C?~ C?~ C?~ C?~ C?~ C?~ C?~ T'~ c@~ c@~ c@~ c@~ c@~
+chr11	252840	C	CT	13	0.64	TT	0	0	CN~ T-~ T2~ T9~ T:~ T>~ T>~ T>~ c*~ cF~ t-~ t.{ t=~ t>~
+chr11	308289	T	CC	11	1.9	CT	0	0	C%~ C/~ C>~ C>~ C?~ c?~ c@~
+chr11	308313	T	CC	14	2.3	CT	0	0	C0~ C7~ C9~ C<6 C<~ C=~ c=~ c>~
+chr11	308362	G	CC	14	2.5	CT	0	0	C*^ C2~ C2~ C36 C3~ C3~ C3~ c,~ c4~
+chr11	308425	G	CC	15	2.6	CT	0	0	C+q C3O C3[ C3] C3~ C66 C6~ c4~ c4~
+chr11	400108	A	GG	5.4	0.88	AG	0	0	G<~ G@~ g;~
+chr11	727451	C	CT	5.2	1.8	TT	0	0	T<~ T<~ cN~ cN~ t6~ t>~
+chr11	837581	G	AG	9	4.8	AA	0	0	A1~ A<~ A<~ AA~ GL~ GL~ G~~ a)~ a:~ a:~ a:~ g-~ gL~
+chr11	838418	A	GA	11	1.7	GG	12	9	AA~ AC~ G)~ G.~ G.~ G=~ G=~ G=~ aR~ g.~ g3~ g<~ g<~
+chr11	838423	C	TC	13	0.62	TT	13	13	C#~ C#~ C>~ T5~ T5~ T5~ T5~ T=~ c"~ c$~ c>~ t5~ t?~ t?~ t?~ t?~
+chr11	838541	C	TC	12	4.9	TT	14	15	C#~ C8~ CB~ T1~ T7~ T7~ T7~ T7~ c!~ cN~ cN~ cN~ t0~ t9~ t9~ t<~ t<~
+chr11	838633	C	GC	11	7	GG	14	13	CB~ CL~ C~~ G2~ G2~ G2~ G2~ G2~ c"~ cL~ g(~ g0~ g1~ g1~ g1~
+chr11	838671	C	TC	12	12	TT	16	15	C%~ CL~ CN~ CN~ C~~ T;~ T;~ T;~ T;~ T<~ T<~ cL~ cL~ cL~ cN~ c~~ t=~ t>~ t>~ t>~
+chr11	838721	T	TC	6.1	6.1	TT	21	19	C1~ C5~ C9~ C9~ T;~ T=~ TN~ TN~ T~~ T~~ T~~ c:~ c:~ c=~ tN~ tN~ tN~ tN~ tN~ t~~
+chr11	838759	T	AT	15	14	AC	29	20	A2~ A3~ A3~ A3~ A6~ A6~ G3~ T*[ T0~ TJ~ TN~ T~~ a+~ a2~ a2~ a3~ a3~ a3~ t3~ tL~ tN~ t~~
+chr11	840250	C	GG	2.3e+02	34	AG	0	0	A)~ A3~ A4~ A4~ A6~ A6~ A7~ C#~ C+o C.~ C2~ CE~ G"~ G"~ G)~ G-~ G.~ G0~ G1~ G1~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G6~ G7~ G7~ a%~ c)~ c+~ g#~ g(~ g)~ g.~ g/~ g/~ g0~ g0~ g0~ g0~ g0~ g0~ g0~ g0~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g6~ g6~ g6~ g6~ g6~ g6~ g6~
+chr11	840318	C	CT	1.4e+02	97	TT	0	0	C"~ C#~ C#~ C*~ C5~ C9~ C<~ C?~ CB~ CB~ CB~ CB~ CB~ CB~ CH~ CI~ CK~ CL~ CQ~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ C~~ C~~ C~~ C~~ C~~ C~~ C~~ C~~ C~~ C~~ C~~ C~~ T&~ T&~ T(~ T)~ T)~ T)~ T,~ T,~ T/~ T/~ T/~ T/~ T3~ T4~ T4~ T4~ T4~ T7~ T8~ T8~ T8~ T=~ T=~ T>~ T>~ T>~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ c"~ c'U c+~ c3~ c5~ c9~ c<~ c<~ cA~ cD~ cI~ cJ~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ t$~ t*~ t*~ t+~ t,~ t.~ t.~ t0~ t5~ t6~ t:~ t:~ t;~ t;~ t;~ t;~ t=~ t?~ t?~ t?~ t?~ t@~ t@~ t@~ t@~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~
+chr11	840476	A	AG	54	54	AA	1.7e+02	173	A%l A&` A'? A.{ A.{ A:` A:` A:` A:` A<~ A=c A?c A?c A?c A?c A?c A?~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ AEN AEN A~] A~` A~` A~b A~b A~c A~c A~c A~c A~~ A~~ A~~ G(J G(M G(M G)M G*P G+q G,J G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,d G,p G,p G,p G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,~ G-P G-P G-P G-P G-P G-P G-q G-q G-q G-q G-q G-q G-q G-q G-q G2P a%K a-O a.X a.{ a/Z a1& a2= a3~ a:` a:` a>Z a>Z a?Z a?Z a?Z a?c a?c a?c a?c a?c a?c a?~ a?~ a?~ a?~ a?~ a?~ a?~ a@c a@c aEN a~c a~c a~c a~c a~~ a~~ a~~ a~~ a~~ g'I g'L g'L g'L g'M g+F g+F g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+p g+p g+p g+p g+p g+p g+p g+q g,F g,O g,O g,O g,O g,O g,O g,O g,O g,_ g,p g,p g,~ g1; g1;
+# Tested sites: 33292
+
+TEST last-sub -p1 hs-rna.mat hs-rna.maf
+chr11	237086	A	G	22	22	A	0	0	A%~ A'~ A2~ G<~ G=~ G=~ G?~ G?~ G@~ G@~ G@~ g"~ g<~ g<~ g?~ g?~ g?~
+chr11	244166	C	T	22	22	C	0	0	T$c T(r T5c T5c T5c T6f T9~ T9~ T9~ T9~ T:~ t$Z t$Z t%~ t/b t;~ t;~
+chr11	244170	T	C	25	25	T	0	0	C&t C5~ C7u C7u C8u C9~ C9~ C9~ C9~ C9~ C:y T$h c)] c)] c/~ c:~ c:~
+chr11	244196	T	C	29	29	T	0	0	C)~ C?~ C?~ C?~ C?~ C?~ C?~ C?~ C?~ C?~ C?~ T'~ c@~ c@~ c@~ c@~ c@~
+chr11	252840	C	T	13	13	C	0	0	CN~ T-~ T2~ T9~ T:~ T>~ T>~ T>~ c*~ cF~ t-~ t.{ t=~ t>~
+chr11	308289	T	C	11	11	T	0	0	C%~ C/~ C>~ C>~ C?~ c?~ c@~
+chr11	308313	T	C	14	14	T	0	0	C0~ C7~ C9~ C<6 C<~ C=~ c=~ c>~
+chr11	308362	G	C	14	13	T	0	0	C*^ C2~ C2~ C36 C3~ C3~ C3~ c,~ c4~
+chr11	308425	G	C	15	14	T	0	0	C+q C3O C3[ C3] C3~ C66 C6~ c4~ c4~
+chr11	838418	A	G	9.6	9.6	A	0	0	AA~ AC~ G)~ G.~ G.~ G=~ G=~ G=~ aR~ g.~ g3~ g<~ g<~
+chr11	838423	C	T	12	12	C	0	0	C#~ C#~ C>~ T5~ T5~ T5~ T5~ T=~ c"~ c$~ c>~ t5~ t?~ t?~ t?~ t?~
+chr11	838541	C	T	7	7	C	0	0	C#~ C8~ CB~ T1~ T7~ T7~ T7~ T7~ c!~ cN~ cN~ cN~ t0~ t9~ t9~ t<~ t<~
+chr11	840250	C	G	2.3e+02	2e+02	A	0	0	A)~ A3~ A4~ A4~ A6~ A6~ A7~ C#~ C+o C.~ C2~ CE~ G"~ G"~ G)~ G-~ G.~ G0~ G1~ G1~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G6~ G7~ G7~ a%~ c)~ c+~ g#~ g(~ g)~ g.~ g/~ g/~ g0~ g0~ g0~ g0~ g0~ g0~ g0~ g0~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g6~ g6~ g6~ g6~ g6~ g6~ g6~
+chr11	840318	C	T	45	45	C	0	0	C"~ C#~ C#~ C*~ C5~ C9~ C<~ C?~ CB~ CB~ CB~ CB~ CB~ CB~ CH~ CI~ CK~ CL~ CQ~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ C~~ C~~ C~~ C~~ C~~ C~~ C~~ C~~ C~~ C~~ C~~ C~~ T&~ T&~ T(~ T)~ T)~ T)~ T,~ T,~ T/~ T/~ T/~ T/~ T3~ T4~ T4~ T4~ T4~ T7~ T8~ T8~ T8~ T=~ T=~ T>~ T>~ T>~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ c"~ c'U c+~ c3~ c5~ c9~ c<~ c<~ cA~ cD~ cI~ cJ~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ t$~ t*~ t*~ t+~ t,~ t.~ t.~ t0~ t5~ t6~ t:~ t:~ t;~ t;~ t;~ t;~ t=~ t?~ t?~ t?~ t?~ t@~ t@~ t@~ t@~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~
+# Tested sites: 20515
+
+TEST last-sub -p3 hs-rna.mat hs-rna.maf
+chr11	237086	A	GGG	22	0.84	AGG	0	0	A%~ A'~ A2~ G<~ G=~ G=~ G?~ G?~ G@~ G@~ G@~ g"~ g<~ g<~ g?~ g?~ g?~
+chr11	244166	C	TTT	22	2.5	CTT	0	0	T$c T(r T5c T5c T5c T6f T9~ T9~ T9~ T9~ T:~ t$Z t$Z t%~ t/b t;~ t;~
+chr11	244170	T	CCC	25	2.5	CCT	0	0	C&t C5~ C7u C7u C8u C9~ C9~ C9~ C9~ C9~ C:y T$h c)] c)] c/~ c:~ c:~
+chr11	244196	T	CCC	29	2.5	CCT	0	0	C)~ C?~ C?~ C?~ C?~ C?~ C?~ C?~ C?~ C?~ C?~ T'~ c@~ c@~ c@~ c@~ c@~
+chr11	252840	C	CTT	14	1.5	TTT	0	0	CN~ T-~ T2~ T9~ T:~ T>~ T>~ T>~ c*~ cF~ t-~ t.{ t=~ t>~
+chr11	308289	T	CCC	11	1.1	CCT	0	0	C%~ C/~ C>~ C>~ C?~ c?~ c@~
+chr11	308313	T	CCC	14	1.4	CCT	0	0	C0~ C7~ C9~ C<6 C<~ C=~ c=~ c>~
+chr11	308362	G	CCC	14	1.5	CCT	0	0	C*^ C2~ C2~ C36 C3~ C3~ C3~ c,~ c4~
+chr11	308425	G	CCC	15	1.5	CCT	0	0	C+q C3O C3[ C3] C3~ C66 C6~ c4~ c4~
+chr11	837581	G	AAG	9.1	0.8	AGG	0	0	A1~ A<~ A<~ AA~ GL~ GL~ G~~ a)~ a:~ a:~ a:~ g-~ gL~
+chr11	838418	A	AGG	12	1.9	AAG	0	0	AA~ AC~ G)~ G.~ G.~ G=~ G=~ G=~ aR~ g.~ g3~ g<~ g<~
+chr11	838423	C	CTT	14	1.4	TTT	0	0	C#~ C#~ C>~ T5~ T5~ T5~ T5~ T=~ c"~ c$~ c>~ t5~ t?~ t?~ t?~ t?~
+chr11	838541	C	CTT	12	1.3	CCT	0	0	C#~ C8~ CB~ T1~ T7~ T7~ T7~ T7~ c!~ cN~ cN~ cN~ t0~ t9~ t9~ t<~ t<~
+chr11	838633	C	CGG	12	1.5	CCG	0	0	CB~ CL~ C~~ G2~ G2~ G2~ G2~ G2~ c"~ cL~ g(~ g0~ g1~ g1~ g1~
+chr11	838671	C	CTT	12	0.15	CCT	0	0	C%~ CL~ CN~ CN~ C~~ T;~ T;~ T;~ T;~ T<~ T<~ cL~ cL~ cL~ cN~ c~~ t=~ t>~ t>~ t>~
+chr11	838721	T	CTT	6.6	1.8	CCT	0	0	C1~ C5~ C9~ C9~ T;~ T=~ TN~ TN~ T~~ T~~ T~~ c:~ c:~ c=~ tN~ tN~ tN~ tN~ tN~ t~~
+chr11	838759	T	AAT	14	0.91	ATT	0	0	A2~ A3~ A3~ A3~ A6~ A6~ G3~ T*[ T0~ TJ~ TN~ T~~ a+~ a2~ a2~ a3~ a3~ a3~ t3~ tL~ tN~ t~~
+chr11	840250	C	GGG	2.3e+02	18	AGG	0	0	A)~ A3~ A4~ A4~ A6~ A6~ A7~ C#~ C+o C.~ C2~ CE~ G"~ G"~ G)~ G-~ G.~ G0~ G1~ G1~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G6~ G7~ G7~ a%~ c)~ c+~ g#~ g(~ g)~ g.~ g/~ g/~ g0~ g0~ g0~ g0~ g0~ g0~ g0~ g0~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g6~ g6~ g6~ g6~ g6~ g6~ g6~
+chr11	840318	C	CTT	1.4e+02	9.6	CCT	0	0	C"~ C#~ C#~ C*~ C5~ C9~ C<~ C?~ CB~ CB~ CB~ CB~ CB~ CB~ CH~ CI~ CK~ CL~ CQ~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ C~~ C~~ C~~ C~~ C~~ C~~ C~~ C~~ C~~ C~~ C~~ C~~ T&~ T&~ T(~ T)~ T)~ T)~ T,~ T,~ T/~ T/~ T/~ T/~ T3~ T4~ T4~ T4~ T4~ T7~ T8~ T8~ T8~ T=~ T=~ T>~ T>~ T>~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ c"~ c'U c+~ c3~ c5~ c9~ c<~ c<~ cA~ cD~ cI~ cJ~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ t$~ t*~ t*~ t+~ t,~ t.~ t.~ t0~ t5~ t6~ t:~ t:~ t;~ t;~ t;~ t;~ t=~ t?~ t?~ t?~ t?~ t@~ t@~ t@~ t@~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~
+chr11	840476	A	AGG	52	2.3	AAG	0	0	A%l A&` A'? A.{ A.{ A:` A:` A:` A:` A<~ A=c A?c A?c A?c A?c A?c A?~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ AEN AEN A~] A~` A~` A~b A~b A~c A~c A~c A~c A~~ A~~ A~~ G(J G(M G(M G)M G*P G+q G,J G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,d G,p G,p G,p G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,~ G-P G-P G-P G-P G-P G-P G-q G-q G-q G-q G-q G-q G-q G-q G-q G2P a%K a-O a.X a.{ a/Z a1& a2= a3~ a:` a:` a>Z a>Z a?Z a?Z a?Z a?c a?c a?c a?c a?c a?c a?~ a?~ a?~ a?~ a?~ a?~ a?~ a@c a@c aEN a~c a~c a~c a~c a~~ a~~ a~~ a~~ a~~ g'I g'L g'L g'L g'M g+F g+F g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+p g+p g+p g+p g+p g+p g+p g+q g,F g,O g,O g,O g,O g,O g,O g,O g,O g,_ g,p g,p g,~ g1; g1;
+# Tested sites: 20515
+

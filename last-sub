@@ -1,0 +1,298 @@
+#! /usr/bin/env python
+
+# XXX do lastal & last-train need an option to read-but-ignore fastq data?
+# XXX allow diffferent ploidy for chrXYM?
+
+import collections
+import math
+import optparse
+import signal
+import sys
+
+def floatStr(myFloat):
+    return "%.2g" % myFloat
+
+def probCorrectFromAsciiCode(asciiCode):  # fastq-sanger ascii codes
+    return 1 - 10 ** (0.1 * (33 - asciiCode))
+
+# Global constants:
+qualTable = [probCorrectFromAsciiCode(i) for i in range(128)]
+alphabet = "ACGT"
+twoStrandAlphabet = alphabet + alphabet.lower()
+
+# Let us use lowercase to represent reverse strands.  For example, a
+# lowercase "c" means that, actually, a guanine was observed on the
+# reverse strand.
+
+#alphabetMap = [len(alphabet)] * 256
+#for i, x in enumerate(alphabet):
+#    alphabetMap[ord(x)] = i
+
+def allGenotypes(myAlphabet, ploidy):
+    if ploidy:
+        for i, x in enumerate(myAlphabet):
+            for y in allGenotypes(myAlphabet[i:], ploidy - 1):
+                yield x + y
+    else:
+        yield ""
+
+def conditionalProbsFromPairProbs(pairProbMatrix):  # p(x and y) -> p(y|x)
+    for row in pairProbMatrix:
+        s = float(sum(row))
+        yield [i / s for i in row]
+
+def twoStrandMatrix(oneStrandMatrix):
+    for i, j in zip(oneStrandMatrix, reversed(oneStrandMatrix)):
+        yield i + j[::-1]
+
+def alignmentProbMatrixFromLastTrain(lines):
+    matrix = []
+    state = 0
+    for line in lines:
+        if state == 0:
+            if line.startswith("# probability matrix"):
+                matrix = []
+                state = 1
+        else:
+            fields = line.split()
+            if len(fields) == 2 + len(alphabet):
+                matrix.append(map(float, fields[2:]))
+            elif not fields:
+                state = 0
+    return matrix
+
+def alignmentProbMatrixFromLastTrainFile(fileName):
+    if fileName == "-":
+        matrix = alignmentProbMatrixFromLastTrain(sys.stdin)
+    else:
+        with open(fileName) as f:
+            matrix = alignmentProbMatrixFromLastTrain(f)
+    if len(matrix) != len(alphabet):
+        raise Exception("can't read last-train file: " + fileName)
+    return matrix
+
+def maxPossibleProbRatioPerRefBase(conditionalProbMatrix):
+    alphabetLen = len(conditionalProbMatrix)
+    for i in range(alphabetLen):  # for each possible reference base
+        maxRatio = 1.0
+        for j in range(alphabetLen):  # for each possible observed base
+            ratio = conditionalProbMatrix[j][j] / conditionalProbMatrix[i][j]
+            maxRatio = max(maxRatio, ratio)
+        yield maxRatio
+
+def minCoveragePerRefBase(opts, conditionalProbMatrix):
+    maxRatios = list(maxPossibleProbRatioPerRefBase(conditionalProbMatrix))
+    twoStrandMaxRatios = [max(i) for i in zip(maxRatios, reversed(maxRatios))]
+    for i in twoStrandMaxRatios:
+        yield int(math.ceil(opts.min / math.log10(i)))
+
+def probsForOneGenotype(baseProbTable, genotype):  # prob(obs. base | genotype)
+    ploidy = len(genotype)
+    rows = [baseProbTable[alphabet.index(i)] for i in genotype]
+    for i in range(len(twoStrandAlphabet)):  # for each possible observed base
+        yield sum(r[i] for r in rows) / float(ploidy)
+
+def alignmentColumns(rSeq, qSeq, probLines):
+    for i, x in enumerate(rSeq):
+        if x != "-":
+            yield x + qSeq[i] + "".join(j[i] for j in probLines)
+
+def alignmentWithColumns(alignment):
+    rName, beg, end, qName, rSeq, qSeq, probLines = alignment
+    columns = list(alignmentColumns(rSeq, qSeq, probLines))
+    return rName, beg, end, qName, columns
+
+def mafInput(fileNames):
+    if not fileNames:
+        fileNames = ["-"]
+    for fileName in fileNames:
+        if fileName == "-":
+            f = sys.stdin
+        else:
+            f = open(fileName)
+        rSeq = qSeq = ""
+        probLines = []
+        for line in f:
+            fields = line.split()
+            if line[0] == "s":
+                if not rSeq:
+                    rName = fields[1]
+                    beg = int(fields[2])
+                    end = beg + int(fields[3])
+                    rSeq = fields[6].upper()
+                elif not qSeq:
+                    qName = fields[1]
+                    if fields[4] == "+":
+                        qSeq = fields[6].upper()
+                    else:
+                        qSeq = fields[6].lower()
+            elif line[0] == "p":
+                probLines.append(fields[1])
+            elif not fields:
+                if qSeq: yield rName, beg, end, qName, rSeq, qSeq, probLines
+                rSeq = qSeq = ""
+                probLines = []
+        if qSeq: yield rName, beg, end, qName, rSeq, qSeq, probLines
+
+def columnFromAlignment(alignment, coord):
+    return alignment[4][coord - alignment[1]]
+
+def columnsFromAlignmentsHere(alignmentsHere, coord):
+    for i in alignmentsHere:
+        column = columnFromAlignment(i, coord)
+        if column[1] in twoStrandAlphabet:
+            yield column
+
+def baseIndexAndProbs(column):
+    p = 1.0
+    for i in column[2:]:
+        p *= qualTable[ord(i)]
+    return twoStrandAlphabet.index(column[1]), p, 1 - p
+
+def logProbPerGenotype(genotypeProbTable, columns):
+    preprocessedColumns = [baseIndexAndProbs(i) for i in columns]
+    for row in genotypeProbTable:
+        logProb = 0.0
+        for baseIndex, p, q in preprocessedColumns:
+            logProb += math.log10(p * row[baseIndex] + q)
+        yield logProb
+
+def isHeterozygous(genotype):
+    return len(genotype) == 2 and genotype[0] != genotype[1]
+
+def alignmentsGroupedByQueryName(alignments):
+    d = collections.defaultdict(list)
+    for i in alignments:
+        d[i[3]].append(i)
+    return d
+
+def pairedColumnData(alignments1, coord1, alignments2, coord2):
+    g1 = alignmentsGroupedByQueryName(alignments1)
+    g2 = alignmentsGroupedByQueryName(alignments2)
+    for k in g1:
+        if len(g1[k]) == len(g2[k]) == 1:
+            c1 = columnFromAlignment(g1[k][0], coord1)
+            c2 = columnFromAlignment(g2[k][0], coord2)
+            if c1[1] in twoStrandAlphabet and c2[1] in twoStrandAlphabet:
+                yield baseIndexAndProbs(c1), baseIndexAndProbs(c2)
+
+def twoSiteLogProb(preprocessedColumnPairs, rowA1, rowA2, rowB1, rowB2):
+    r = 0.0
+    for i1, i2 in preprocessedColumnPairs:
+        y1, p1, q1 = i1
+        y2, p2, q2 = i2
+        r += math.log10(0.5 * ((p1 * rowA1[y1] + q1) * (p2 * rowA2[y2] + q2) +
+                               (p1 * rowB1[y1] + q1) * (p2 * rowB2[y2] + q2)))
+    return r
+
+def hetPhase(baseProbTable, genotype1, genotype2, preprocessedColumnPairs):
+    x1, y1 = genotype1
+    x2, y2 = genotype2
+    rowA1 = baseProbTable[alphabet.index(x1)]
+    rowA2 = baseProbTable[alphabet.index(x2)]
+    rowB1 = baseProbTable[alphabet.index(y1)]
+    rowB2 = baseProbTable[alphabet.index(y2)]
+    p = twoSiteLogProb(preprocessedColumnPairs, rowA1, rowA2, rowB1, rowB2)
+    q = twoSiteLogProb(preprocessedColumnPairs, rowA1, rowB2, rowB1, rowA2)
+    if p >= q:
+        return x2 + y2, p - q
+    else:
+        return y2 + x2, q - p
+
+def lastSub(opts, args):
+    # xxx re-do this for each chromosome, to allow different ploidy?
+    genotypes = list(allGenotypes(alphabet, opts.ploidy))
+
+    lastTrainFile = args[0]
+    pairProbMatrix = alignmentProbMatrixFromLastTrainFile(lastTrainFile)
+    conditionalProbMatrix = list(conditionalProbsFromPairProbs(pairProbMatrix))
+    minCoverage = list(minCoveragePerRefBase(opts, conditionalProbMatrix))
+    baseProbTable = list(twoStrandMatrix(conditionalProbMatrix))
+    genotypeProbTable = [list(probsForOneGenotype(baseProbTable, i))
+                         for i in genotypes]
+
+    mafFiles = args[1:]
+    alignments = sorted(mafInput(mafFiles))
+    numOfTestedSites = 0
+    alignmentCount = len(alignments)
+    alignmentPos = 0
+    chrom = ""
+    coord = 0
+    alignmentsHere = []
+
+    oldHetCoord = 0
+    oldHetAlignments = []
+    oldHetGenotype = "AA"
+
+    while True:
+        if not alignmentsHere:
+            if alignmentPos == alignmentCount:
+                break
+            nextAlignment = alignments[alignmentPos]
+            chrom = nextAlignment[0]
+            coord = nextAlignment[1]
+        while alignmentPos < alignmentCount:
+            nextAlignment = alignments[alignmentPos]
+            if nextAlignment[0] > chrom or nextAlignment[1] > coord:
+                break
+            alignmentsHere.append(alignmentWithColumns(nextAlignment))
+            alignmentPos += 1
+        while True:  # xxx bogus loop: what's the right way to do this?
+            refBase = columnFromAlignment(alignmentsHere[0], coord)[0]
+            if refBase not in alphabet:
+                break
+            if len(alignmentsHere) < minCoverage[alphabet.index(refBase)]:
+                break
+            numOfTestedSites += 1
+            columns = sorted(columnsFromAlignmentsHere(alignmentsHere, coord))
+            if all(i[1].upper() == refBase for i in columns):
+                break  # unnecessary, but makes it faster
+            logProbs = list(logProbPerGenotype(genotypeProbTable, columns))
+            refGenotype = refBase * opts.ploidy
+            refLogProb = logProbs[genotypes.index(refGenotype)]
+            s = sorted(zip(logProbs, genotypes))
+            logProb1, genotype1 = s[-1]
+            logProbIncRef = logProb1 - refLogProb
+            if logProbIncRef < opts.min:
+                break
+            logProb2, genotype2 = s[-2]
+            logProbInc2nd = logProb1 - logProb2
+            if isHeterozygous(genotype1):
+                pairs = list(pairedColumnData(oldHetAlignments, oldHetCoord,
+                                              alignmentsHere, coord))
+                h = hetPhase(baseProbTable, oldHetGenotype, genotype1, pairs)
+                phasedGenotype, logProbIncPhase = h
+                phaseCoverage = len(pairs)
+                oldHetCoord = coord
+                oldHetAlignments = alignmentsHere
+                oldHetGenotype = phasedGenotype
+            else:
+                phasedGenotype = genotype1
+                logProbIncPhase = 0
+                phaseCoverage = 0
+            observations = " ".join(i[1:] for i in columns)
+            out = (chrom, str(coord), refBase, phasedGenotype,
+                   floatStr(logProbIncRef), floatStr(logProbInc2nd), genotype2,
+                   floatStr(logProbIncPhase), str(phaseCoverage), observations)
+            print "\t".join(out)
+            break
+        coord += 1
+        alignmentsHere = [i for i in alignmentsHere if i[2] > coord]
+
+    print "# Tested sites:", numOfTestedSites
+
+if __name__ == "__main__":
+    signal.signal(signal.SIGPIPE, signal.SIG_DFL)  # avoid silly error message
+    usage = "%prog [options] last-train.out alignments.maf"
+    op = optparse.OptionParser(usage=usage)
+    op.add_option("-m", "--min", type="float", default=6, metavar="INC", help=
+                  "minimum increase in log10(likelihood) over "
+                  "homozygous reference (default=%default)")
+    op.add_option("-p", "--ploidy", type="int", default=2, metavar="N",
+                  help="1=haploid, 2=diploid, etc (default=%default)")
+    opts, args = op.parse_args()
+    if opts.ploidy < 1:
+        op.error("ploidy must be at least 1")
+    if not args:
+        op.error("I need a last-train file and some MAF alignments")
+    lastSub(opts, args)
