@@ -1,13 +1,20 @@
 TEST last-sub -h
 Usage: last-sub [options] last-train.out alignments.maf
 
+Find nucleotide substitutions relative to a reference genome.
+
 Options:
-  -h, --help         show this help message and exit
-  -m INC, --min=INC  minimum increase in log10(likelihood) over homozygous
-                     reference (default=6)
-  -p N, --ploidy=N   1=haploid, 2=diploid, etc (default=2)
+  -h, --help            show this help message and exit
+  -m INC, --min=INC     minimum increase in log10(likelihood) over homozygous
+                        reference (default=6)
+  -p N, --ploidy=N      1=haploid, 2=diploid, etc (default=2)
+  -f BP, --furthest=BP  only use query sequences with colinear alignments
+                        separated by <= BP
+  -s BP, --splice=BP    only use query sequences with strong splice signals
+                        and a splice >= BP
 
 TEST last-sub hs-rna.mat hs-rna.maf
+# last-sub hs-rna.mat hs-rna.maf
 chr11	237086	A	GG	22	2.1	AG	0	0	A%~ A'~ A2~ G<~ G=~ G=~ G?~ G?~ G@~ G@~ G@~ g"~ g<~ g<~ g?~ g?~ g?~
 chr11	244166	C	TT	22	4.2	CT	0	0	T$c T(r T5c T5c T5c T6f T9~ T9~ T9~ T9~ T:~ t$Z t$Z t%~ t/b t;~ t;~
 chr11	244170	T	CC	25	4.3	CT	0	0	C&t C5~ C7u C7u C8u C9~ C9~ C9~ C9~ C9~ C:y T$h c)] c)] c/~ c:~ c:~
@@ -31,6 +38,7 @@ chr11	840476	A	AG	54	54	AA	1.7e+02	173	A%l A&` A'? A.{ A.{ A:` A:` A:` A:` A<~ A
 # Tested sites: 20515
 
 TEST last-sub -m5 hs-rna.mat hs-rna.maf
+# last-sub -m5 hs-rna.mat hs-rna.maf
 chr11	214543	C	TT	5.4	0.88	CT	0	0	T>~ tA~ tA~
 chr11	237086	A	GG	22	2.1	AG	0	0	A%~ A'~ A2~ G<~ G=~ G=~ G?~ G?~ G@~ G@~ G@~ g"~ g<~ g<~ g?~ g?~ g?~
 chr11	244166	C	TT	22	4.2	CT	0	0	T$c T(r T5c T5c T5c T6f T9~ T9~ T9~ T9~ T:~ t$Z t$Z t%~ t/b t;~ t;~
@@ -57,6 +65,7 @@ chr11	840476	A	AG	54	54	AA	1.7e+02	173	A%l A&` A'? A.{ A.{ A:` A:` A:` A:` A<~ A
 # Tested sites: 33292
 
 TEST last-sub -p1 hs-rna.mat hs-rna.maf
+# last-sub -p1 hs-rna.mat hs-rna.maf
 chr11	237086	A	G	22	22	A	0	0	A%~ A'~ A2~ G<~ G=~ G=~ G?~ G?~ G@~ G@~ G@~ g"~ g<~ g<~ g?~ g?~ g?~
 chr11	244166	C	T	22	22	C	0	0	T$c T(r T5c T5c T5c T6f T9~ T9~ T9~ T9~ T:~ t$Z t$Z t%~ t/b t;~ t;~
 chr11	244170	T	C	25	25	T	0	0	C&t C5~ C7u C7u C8u C9~ C9~ C9~ C9~ C9~ C:y T$h c)] c)] c/~ c:~ c:~
@@ -74,6 +83,7 @@ chr11	840318	C	T	45	45	C	0	0	C"~ C#~ C#~ C*~ C5~ C9~ C<~ C?~ CB~ CB~ CB~ CB~ CB~
 # Tested sites: 20515
 
 TEST last-sub -p3 hs-rna.mat hs-rna.maf
+# last-sub -p3 hs-rna.mat hs-rna.maf
 chr11	237086	A	GGG	22	0.84	AGG	0	0	A%~ A'~ A2~ G<~ G=~ G=~ G?~ G?~ G@~ G@~ G@~ g"~ g<~ g<~ g?~ g?~ g?~
 chr11	244166	C	TTT	22	2.5	CTT	0	0	T$c T(r T5c T5c T5c T6f T9~ T9~ T9~ T9~ T:~ t$Z t$Z t%~ t/b t;~ t;~
 chr11	244170	T	CCC	25	2.5	CCT	0	0	C&t C5~ C7u C7u C8u C9~ C9~ C9~ C9~ C9~ C:y T$h c)] c)] c/~ c:~ c:~

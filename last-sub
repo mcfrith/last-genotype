@@ -1,11 +1,14 @@
 #! /usr/bin/env python
+# Copyright 2017 Martin C. Frith
 
-# XXX do lastal & last-train need an option to read-but-ignore fastq data?
-# XXX allow diffferent ploidy for chrXYM?
+# xxx do lastal & last-train need an option to read-but-ignore fastq data?
 
 import collections
+import itertools
 import math
+import operator
 import optparse
+import os
 import signal
 import sys
 
@@ -98,7 +101,7 @@ def alignmentColumns(rSeq, qSeq, probLines):
             yield x + qSeq[i] + "".join(j[i] for j in probLines)
 
 def alignmentWithColumns(alignment):
-    rName, beg, end, qName, rSeq, qSeq, probLines = alignment
+    rName, beg, end, qName, rSeq, qSeq, probLines, sense = alignment
     columns = list(alignmentColumns(rSeq, qSeq, probLines))
     return rName, beg, end, qName, columns
 
@@ -111,10 +114,15 @@ def mafInput(fileNames):
         else:
             f = open(fileName)
         rSeq = qSeq = ""
+        sense = None
         probLines = []
         for line in f:
             fields = line.split()
-            if line[0] == "s":
+            if line[0] == "a":
+                for i in fields:
+                    if i.startswith("sense="):
+                        sense = float(i[6:])
+            elif line[0] == "s":
                 if not rSeq:
                     rName = fields[1]
                     beg = int(fields[2])
@@ -129,10 +137,49 @@ def mafInput(fileNames):
             elif line[0] == "p":
                 probLines.append(fields[1])
             elif not fields:
-                if qSeq: yield rName, beg, end, qName, rSeq, qSeq, probLines
+                if qSeq:
+                    yield rName, beg, end, qName, rSeq, qSeq, probLines, sense
                 rSeq = qSeq = ""
+                sense = None
                 probLines = []
-        if qSeq: yield rName, beg, end, qName, rSeq, qSeq, probLines
+        if qSeq:
+            yield rName, beg, end, qName, rSeq, qSeq, probLines, sense
+
+def distanceBetweenAlignments(x, y):
+    if y[0] != x[0] or y[5].isupper() != x[5].isupper():
+        return -1
+    if x[5].isupper():
+        return y[1] - x[2]
+    else:
+        return x[1] - y[2]
+
+def isGoodAlignments(opts, alignmentsForOneQuery):
+    isGood = True
+    if opts.splice is not None:
+        isGood = False
+        sense = alignmentsForOneQuery[0][7]
+        if sense is None:
+            raise Exception("missing sense=")
+        if abs(sense) < 10:  # xxx hard-coded empirical parameter
+            return False
+    for j, y in enumerate(alignmentsForOneQuery):
+        if j:
+            x = alignmentsForOneQuery[j - 1]
+            distance = distanceBetweenAlignments(x, y)
+            if opts.furthest is not None:
+                if distance < 0 or distance > opts.furthest:
+                    return False
+            if opts.splice is not None:
+                if distance >= 0 and distance >= opts.splice:
+                    isGood = True
+    return isGood
+
+def goodAlignments(opts, alignments):
+    for k, v in itertools.groupby(alignments, operator.itemgetter(3)):
+        alignmentsForOneQuery = list(v)
+        if isGoodAlignments(opts, alignmentsForOneQuery):
+            for i in alignmentsForOneQuery:
+                yield i
 
 def columnFromAlignment(alignment, coord):
     return alignment[4][coord - alignment[1]]
@@ -200,6 +247,9 @@ def hetPhase(baseProbTable, genotype1, genotype2, preprocessedColumnPairs):
         return y2 + x2, q - p
 
 def lastSub(opts, args):
+    prog = os.path.basename(sys.argv[0])
+    print "#", prog, " ".join(sys.argv[1:])
+
     # xxx re-do this for each chromosome, to allow different ploidy?
     genotypes = list(allGenotypes(alphabet, opts.ploidy))
 
@@ -212,7 +262,10 @@ def lastSub(opts, args):
                          for i in genotypes]
 
     mafFiles = args[1:]
-    alignments = sorted(mafInput(mafFiles))
+    incomingAlignments = mafInput(mafFiles)
+    if opts.splice is not None or opts.furthest is not None:
+        incomingAlignments = goodAlignments(opts, incomingAlignments)
+    alignments = sorted(incomingAlignments)
     numOfTestedSites = 0
     alignmentCount = len(alignments)
     alignmentPos = 0
@@ -284,12 +337,19 @@ def lastSub(opts, args):
 if __name__ == "__main__":
     signal.signal(signal.SIGPIPE, signal.SIG_DFL)  # avoid silly error message
     usage = "%prog [options] last-train.out alignments.maf"
-    op = optparse.OptionParser(usage=usage)
+    descr = "Find nucleotide substitutions relative to a reference genome."
+    op = optparse.OptionParser(usage=usage, description=descr)
     op.add_option("-m", "--min", type="float", default=6, metavar="INC", help=
                   "minimum increase in log10(likelihood) over "
                   "homozygous reference (default=%default)")
     op.add_option("-p", "--ploidy", type="int", default=2, metavar="N",
                   help="1=haploid, 2=diploid, etc (default=%default)")
+    op.add_option("-f", "--furthest", type="float", metavar="BP", help=
+                  "only use query sequences with colinear alignments "
+                  "separated by <= BP")
+    op.add_option("-s", "--splice", type="float", metavar="BP", help=
+                  "only use query sequences with strong splice signals "
+                  "and a splice >= BP")
     opts, args = op.parse_args()
     if opts.ploidy < 1:
         op.error("ploidy must be at least 1")
