@@ -106,3 +106,37 @@ chr11	840318	C	CTT	1.4e+02	9.6	CCT	0	0	C"~ C#~ C#~ C*~ C5~ C9~ C<~ C?~ CB~ CB~ C
 chr11	840476	A	AGG	52	2.3	AAG	0	0	A%l A&` A'? A.{ A.{ A:` A:` A:` A:` A<~ A=c A?c A?c A?c A?c A?c A?~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ AEN AEN A~] A~` A~` A~b A~b A~c A~c A~c A~c A~~ A~~ A~~ G(J G(M G(M G)M G*P G+q G,J G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,d G,p G,p G,p G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,~ G-P G-P G-P G-P G-P G-P G-q G-q G-q G-q G-q G-q G-q G-q G-q G2P a%K a-O a.X a.{ a/Z a1& a2= a3~ a:` a:` a>Z a>Z a?Z a?Z a?Z a?c a?c a?c a?c a?c a?c a?~ a?~ a?~ a?~ a?~ a?~ a?~ a@c a@c aEN a~c a~c a~c a~c a~~ a~~ a~~ a~~ a~~ g'I g'L g'L g'L g'M g+F g+F g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+p g+p g+p g+p g+p g+p g+p g+q g,F g,O g,O g,O g,O g,O g,O g,O g,O g,_ g,p g,p g,~ g1; g1;
 # Tested sites: 20520
 
+TEST last-genotype -f1e6 -s50 hs-rna.mat hs-rna.maf
+# last-genotype -f1e6 -s50 hs-rna.mat hs-rna.maf
+chr11	237086	A	GG	22	2.1	AG	0	0	A%~ A'~ A2~ G<~ G=~ G=~ G?~ G?~ G@~ G@~ G@~ g"~ g<~ g<~ g?~ g?~ g?~
+chr11	244166	C	TT	22	4.2	CT	0	0	T$c T(r T5c T5c T5c T6f T9~ T9~ T9~ T9~ T:~ t$Z t$Z t%~ t/b t;~ t;~
+chr11	244170	T	CC	25	4.3	CT	0	0	C&t C5~ C7u C7u C8u C9~ C9~ C9~ C9~ C9~ C:y T$h c)] c)] c/~ c:~ c:~
+chr11	244196	T	CC	29	4.3	CT	0	0	C)~ C?~ C?~ C?~ C?~ C?~ C?~ C?~ C?~ C?~ C?~ T'~ c@~ c@~ c@~ c@~ c@~
+chr11	252840	C	CT	13	0.64	TT	0	0	CN~ T-~ T2~ T9~ T:~ T>~ T>~ T>~ c*~ cF~ t-~ t.{ t=~ t>~
+chr11	308289	T	CC	7.8	1.3	CT	0	0	C%~ C>~ C?~ c?~ c@~
+chr11	308313	T	CC	8.7	1.5	CT	0	0	C0~ C9~ C<~ c=~ c>~
+chr11	308362	G	CC	8	1.4	CT	0	0	C2~ C2~ C3~ c,~ c4~
+chr11	308425	G	CC	8.4	1.4	CT	0	0	C+q C3~ C6~ c4~ c4~
+chr11	837581	G	AG	8.5	5	AA	0	0	A1~ A<~ A<~ AA~ GL~ GL~ G~~ a:~ a:~ a:~ g-~ gL~
+chr11	838418	A	GA	9.8	2.2	GG	12	9	AA~ AC~ G.~ G.~ G=~ G=~ G=~ aR~ g3~ g<~ g<~
+chr11	838423	C	TC	10	1.1	TT	13	11	C#~ C>~ T5~ T5~ T5~ T5~ T=~ c"~ c$~ c>~ t?~ t?~ t?~
+chr11	838541	C	TC	9.4	4	TT	13	12	C#~ C8~ CB~ T1~ T7~ T7~ T7~ cN~ cN~ t0~ t9~ t9~ t<~
+chr11	838633	C	GC	10	4.7	GG	13	11	CB~ CL~ G2~ G2~ G2~ G2~ G2~ cL~ g(~ g0~ g1~ g1~
+chr11	838671	C	TC	10	5.8	TT	13	12	C%~ CN~ CN~ T;~ T;~ T;~ T<~ T<~ cL~ cL~ cN~ t=~ t>~ t>~
+chr11	838759	T	AT	11	9	AC	18	14	A2~ A3~ A3~ A6~ A6~ TJ~ TN~ T~~ a+~ a3~ a3~ a3~ tL~ tN~
+chr11	840250	C	GG	74	9.7	CG	0	0	A)~ A4~ A7~ C#~ C2~ CE~ G"~ G1~ G1~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G7~ c+~ g0~ g0~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g6~
+chr11	840318	C	CT	45	37	TT	0	0	C#~ C5~ C9~ C?~ CB~ CB~ CB~ CB~ CH~ CI~ CL~ CR~ CR~ CR~ CR~ CR~ C~~ C~~ C~~ C~~ C~~ T&~ T)~ T,~ T/~ T/~ T3~ T4~ T=~ T=~ T>~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ cA~ cR~ cR~ cR~ cR~ cR~ c~~ c~~ c~~ c~~ t*~ t;~ t;~ t=~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~
+chr11	840476	A	AG	20	20	AA	66	64	A%l A.{ A.{ A<~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ A~~ A~~ A~~ G+q G,d G,p G,p G,p G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G-q G-q G-q G-q G-q G-q G-q G-q G-q a.{ a?~ a?~ a?~ a?~ a?~ a~~ a~~ a~~ a~~ a~~ g+p g+p g+p g+p g+p g+p g+p g,p g,p
+# Tested sites: 18086
+
+TEST last-genotype -f1000 hs-rna.mat hs-rna.maf
+# last-genotype -f1000 hs-rna.mat hs-rna.maf
+chr11	308289	T	CC	11	1.9	CT	0	0	C%~ C/~ C>~ C>~ C?~ c?~ c@~
+chr11	308313	T	CC	14	2.3	CT	0	0	C0~ C7~ C9~ C<6 C<~ C=~ c=~ c>~
+chr11	308362	G	CC	14	2.5	CT	0	0	C*^ C2~ C2~ C36 C3~ C3~ C3~ c,~ c4~
+chr11	308425	G	CC	15	2.6	CT	0	0	C+q C3O C3[ C3] C3~ C66 C6~ c4~ c4~
+chr11	840250	C	GG	1.2e+02	18	AG	0	0	A6~ A6~ G)~ G0~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ c)~ g#~ g(~ g)~ g.~ g/~ g/~ g0~ g0~ g0~ g0~ g0~ g0~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g6~ g6~ g6~ g6~ g6~ g6~
+chr11	840318	C	CT	58	50	TT	0	0	C"~ C#~ C*~ C<~ CQ~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ C~~ C~~ C~~ T,~ T/~ T4~ T7~ T8~ T8~ T?~ c"~ c+~ c3~ c5~ c9~ c<~ c<~ cD~ cI~ cJ~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ t$~ t*~ t+~ t,~ t.~ t.~ t0~ t5~ t6~ t:~ t;~ t;~ t?~ t?~ t?~ t@~ t@~ t@~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~
+chr11	840476	A	AG	18	18	AA	79	77	A&` A'? A:` A:` A:` A:` AEN AEN A~] A~` A~` G(J G(M G(M G)M G,J G,~ G-P G-P a%K a-O a.X a/Z a1& a2= a3~ a:` a:` a>Z a>Z a?Z a?Z a?Z a?c a?c a?c a?c a?c a?c a?~ a?~ a@c a@c aEN a~c a~c a~c a~c g'I g'L g'L g'L g'M g+F g+F g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+q g,F g,O g,O g,O g,O g,O g,O g,O g,O g,~ g1; g1;
+# Tested sites: 6909
+
