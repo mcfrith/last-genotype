@@ -246,7 +246,7 @@ def hetPhase(baseProbTable, genotype1, genotype2, preprocessedColumnPairs):
     else:
         return y2 + x2, q - p
 
-def lastSub(opts, args):
+def lastGenotype(opts, args):
     prog = os.path.basename(sys.argv[0])
     print "#", prog, " ".join(sys.argv[1:])
 
@@ -355,4 +355,4 @@ if __name__ == "__main__":
         op.error("ploidy must be at least 1")
     if not args:
         op.error("I need a last-train file and some MAF alignments")
-    lastSub(opts, args)
+    lastGenotype(opts, args)

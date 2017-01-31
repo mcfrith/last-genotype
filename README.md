@@ -1,4 +1,4 @@
-# last-sub
+# last-genotype
 
 This program identifies nucleotide substitutions relative to a
 reference genome, from [LAST](http://last.cbrc.jp/) alignments of DNA
@@ -17,9 +17,9 @@ aligned column (and makes `lastal` slower).
 
 In any case, you should get a file with substitution rates
 (e.g. `myseq.par`), and a file of alignments (e.g. `myseq.maf`).
-Now, run `last-sub` like this:
+Now, run `last-genotype` like this:
 
-    last-sub myseq.par myseq.maf > out.txt
+    last-genotype myseq.par myseq.maf > out.txt
 
 ## Output format
 
@@ -71,9 +71,9 @@ the `C` at 3213195 and `G` at 3223437 on the other chromosome.
   bases indicate reverse-strand observations; for example `g+` means
   that, actually, a `C` was observed on the reverse strand.
 
-By default, `last-sub` only shows sites with log10[
-likelihood(predicted genotype) / likelihood(homozygous reference) ] >=
-6.
+By default, `last-genotype` only shows sites with
+log10[ likelihood(predicted genotype) / likelihood(homozygous reference) ]
+>= 6.
 
 The output ends with a line like this:
 
@@ -84,12 +84,12 @@ possibility of achieving the log likelihood threshold.
 
 ## RNA reads and pseudogenes
 
-If your reads come from RNA, `last-sub` may make false predictions in
-pseudogenes.  This is because reads from spliced genes get misaligned
-to processed pseudogenes (which lack introns, allowing a misleadingly
-good alignment).  You can avoid this problem by doing:
+If your reads come from RNA, `last-genotype` may make false
+predictions in pseudogenes.  This is because reads from spliced genes
+get misaligned to processed pseudogenes (which lack introns, allowing
+a misleadingly good alignment).  You can avoid this problem by doing:
 
-    last-sub -s50 -f1e6 myseq.par myseq.maf > out.txt
+    last-genotype -s50 -f1e6 myseq.par myseq.maf > out.txt
 
 This tells it to only use reads that have typical spliced alignments:
 colinear, with no splice > 10^6 bases, strong splice signals
@@ -117,12 +117,13 @@ It can do arbitrary ploidy (hexaploid or whatever).
 
 ## Limitations
 
-* Currently, `last-sub` does not use per-base quality data (e.g. from
-  fastq files).  This is because it was designed for reads with more
-  indel than substitution errors, such as MinION or PacBio.  I am not
-  sure whether or how per-base qualities should be used for such data.
+* Currently, `last-genotype` does not use per-base quality data
+  (e.g. from fastq files).  This is because it was designed for reads
+  with more indel than substitution errors, such as MinION or PacBio.
+  I am not sure whether or how per-base qualities should be used for
+  such data.
 
-* `last-sub` does not allow for heterogeneous samples, e.g. from
+* `last-genotype` does not allow for heterogeneous samples, e.g. from
   cancer, where one site may have, say, 27% `A` and 73% `C`.  But it
   will often identify such sites as heterozygous, which may be useful.
 
@@ -134,7 +135,3 @@ It can do arbitrary ploidy (hexaploid or whatever).
 * It does not allow different ploidies for different chromosomes
   (e.g. X, Y, M).  This should be easy to implement, the main
   difficulty is designing the program option.
-
-## TO DO
-
-* Is this the best program name?

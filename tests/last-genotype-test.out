@@ -1,5 +1,5 @@
-TEST last-sub -h
-Usage: last-sub [options] last-train.out alignments.maf
+TEST last-genotype -h
+Usage: last-genotype [options] last-train.out alignments.maf
 
 Find nucleotide substitutions relative to a reference genome.
 
@@ -13,8 +13,8 @@ Options:
   -s BP, --splice=BP    only use query sequences with strong splice signals
                         and a splice >= BP
 
-TEST last-sub hs-rna.mat hs-rna.maf
-# last-sub hs-rna.mat hs-rna.maf
+TEST last-genotype hs-rna.mat hs-rna.maf
+# last-genotype hs-rna.mat hs-rna.maf
 chr11	237086	A	GG	22	2.1	AG	0	0	A%~ A'~ A2~ G<~ G=~ G=~ G?~ G?~ G@~ G@~ G@~ g"~ g<~ g<~ g?~ g?~ g?~
 chr11	244166	C	TT	22	4.2	CT	0	0	T$c T(r T5c T5c T5c T6f T9~ T9~ T9~ T9~ T:~ t$Z t$Z t%~ t/b t;~ t;~
 chr11	244170	T	CC	25	4.3	CT	0	0	C&t C5~ C7u C7u C8u C9~ C9~ C9~ C9~ C9~ C:y T$h c)] c)] c/~ c:~ c:~
@@ -37,8 +37,8 @@ chr11	840318	C	CT	1.4e+02	97	TT	0	0	C"~ C#~ C#~ C*~ C5~ C9~ C<~ C?~ CB~ CB~ CB~ 
 chr11	840476	A	AG	54	54	AA	1.7e+02	173	A%l A&` A'? A.{ A.{ A:` A:` A:` A:` A<~ A=c A?c A?c A?c A?c A?c A?~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ AEN AEN A~] A~` A~` A~b A~b A~c A~c A~c A~c A~~ A~~ A~~ G(J G(M G(M G)M G*P G+q G,J G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,d G,p G,p G,p G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,~ G-P G-P G-P G-P G-P G-P G-q G-q G-q G-q G-q G-q G-q G-q G-q G2P a%K a-O a.X a.{ a/Z a1& a2= a3~ a:` a:` a>Z a>Z a?Z a?Z a?Z a?c a?c a?c a?c a?c a?c a?~ a?~ a?~ a?~ a?~ a?~ a?~ a@c a@c aEN a~c a~c a~c a~c a~~ a~~ a~~ a~~ a~~ g'I g'L g'L g'L g'M g+F g+F g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+p g+p g+p g+p g+p g+p g+p g+q g,F g,O g,O g,O g,O g,O g,O g,O g,O g,_ g,p g,p g,~ g1; g1;
 # Tested sites: 20515
 
-TEST last-sub -m5 hs-rna.mat hs-rna.maf
-# last-sub -m5 hs-rna.mat hs-rna.maf
+TEST last-genotype -m5 hs-rna.mat hs-rna.maf
+# last-genotype -m5 hs-rna.mat hs-rna.maf
 chr11	214543	C	TT	5.4	0.88	CT	0	0	T>~ tA~ tA~
 chr11	237086	A	GG	22	2.1	AG	0	0	A%~ A'~ A2~ G<~ G=~ G=~ G?~ G?~ G@~ G@~ G@~ g"~ g<~ g<~ g?~ g?~ g?~
 chr11	244166	C	TT	22	4.2	CT	0	0	T$c T(r T5c T5c T5c T6f T9~ T9~ T9~ T9~ T:~ t$Z t$Z t%~ t/b t;~ t;~
@@ -64,8 +64,8 @@ chr11	840318	C	CT	1.4e+02	97	TT	0	0	C"~ C#~ C#~ C*~ C5~ C9~ C<~ C?~ CB~ CB~ CB~ 
 chr11	840476	A	AG	54	54	AA	1.7e+02	173	A%l A&` A'? A.{ A.{ A:` A:` A:` A:` A<~ A=c A?c A?c A?c A?c A?c A?~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ AEN AEN A~] A~` A~` A~b A~b A~c A~c A~c A~c A~~ A~~ A~~ G(J G(M G(M G)M G*P G+q G,J G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,P G,d G,p G,p G,p G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,~ G-P G-P G-P G-P G-P G-P G-q G-q G-q G-q G-q G-q G-q G-q G-q G2P a%K a-O a.X a.{ a/Z a1& a2= a3~ a:` a:` a>Z a>Z a?Z a?Z a?Z a?c a?c a?c a?c a?c a?c a?~ a?~ a?~ a?~ a?~ a?~ a?~ a@c a@c aEN a~c a~c a~c a~c a~~ a~~ a~~ a~~ a~~ g'I g'L g'L g'L g'M g+F g+F g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+p g+p g+p g+p g+p g+p g+p g+q g,F g,O g,O g,O g,O g,O g,O g,O g,O g,_ g,p g,p g,~ g1; g1;
 # Tested sites: 33292
 
-TEST last-sub -p1 hs-rna.mat hs-rna.maf
-# last-sub -p1 hs-rna.mat hs-rna.maf
+TEST last-genotype -p1 hs-rna.mat hs-rna.maf
+# last-genotype -p1 hs-rna.mat hs-rna.maf
 chr11	237086	A	G	22	22	A	0	0	A%~ A'~ A2~ G<~ G=~ G=~ G?~ G?~ G@~ G@~ G@~ g"~ g<~ g<~ g?~ g?~ g?~
 chr11	244166	C	T	22	22	C	0	0	T$c T(r T5c T5c T5c T6f T9~ T9~ T9~ T9~ T:~ t$Z t$Z t%~ t/b t;~ t;~
 chr11	244170	T	C	25	25	T	0	0	C&t C5~ C7u C7u C8u C9~ C9~ C9~ C9~ C9~ C:y T$h c)] c)] c/~ c:~ c:~
@@ -82,8 +82,8 @@ chr11	840250	C	G	2.3e+02	2e+02	A	0	0	A)~ A3~ A4~ A4~ A6~ A6~ A7~ C#~ C+o C.~ C2~
 chr11	840318	C	T	45	45	C	0	0	C"~ C#~ C#~ C*~ C5~ C9~ C<~ C?~ CB~ CB~ CB~ CB~ CB~ CB~ CH~ CI~ CK~ CL~ CQ~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ C~~ C~~ C~~ C~~ C~~ C~~ C~~ C~~ C~~ C~~ C~~ C~~ T&~ T&~ T(~ T)~ T)~ T)~ T,~ T,~ T/~ T/~ T/~ T/~ T3~ T4~ T4~ T4~ T4~ T7~ T8~ T8~ T8~ T=~ T=~ T>~ T>~ T>~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ T?~ c"~ c'U c+~ c3~ c5~ c9~ c<~ c<~ cA~ cD~ cI~ cJ~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ t$~ t*~ t*~ t+~ t,~ t.~ t.~ t0~ t5~ t6~ t:~ t:~ t;~ t;~ t;~ t;~ t=~ t?~ t?~ t?~ t?~ t@~ t@~ t@~ t@~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~
 # Tested sites: 20515
 
-TEST last-sub -p3 hs-rna.mat hs-rna.maf
-# last-sub -p3 hs-rna.mat hs-rna.maf
+TEST last-genotype -p3 hs-rna.mat hs-rna.maf
+# last-genotype -p3 hs-rna.mat hs-rna.maf
 chr11	237086	A	GGG	22	0.84	AGG	0	0	A%~ A'~ A2~ G<~ G=~ G=~ G?~ G?~ G@~ G@~ G@~ g"~ g<~ g<~ g?~ g?~ g?~
 chr11	244166	C	TTT	22	2.5	CTT	0	0	T$c T(r T5c T5c T5c T6f T9~ T9~ T9~ T9~ T:~ t$Z t$Z t%~ t/b t;~ t;~
 chr11	244170	T	CCC	25	2.5	CCT	0	0	C&t C5~ C7u C7u C8u C9~ C9~ C9~ C9~ C9~ C:y T$h c)] c)] c/~ c:~ c:~
