@@ -4,6 +4,7 @@
 # xxx do lastal & last-train need an option to read-but-ignore fastq data?
 
 import collections
+import fnmatch
 import itertools
 import math
 import operator
@@ -17,6 +18,24 @@ def floatStr(myFloat):
 
 def probCorrectFromAsciiCode(asciiCode):  # fastq-sanger ascii codes
     return 1 - 10 ** (0.1 * (33 - asciiCode))
+
+def ploidiesFromStrings(ploidyStrings):
+    for i in ploidyStrings:
+        for j in i.split(","):
+            if ":" in j:
+                pattern, number = j.rsplit(":", 1)
+            else:
+                pattern, number = "*", j
+            ploidy = int(number)
+            if ploidy < 1:
+                raise Exception("bad ploidy: " + number)
+            yield pattern, ploidy
+
+def ploidyOfChromosome(ploidies, chromosomeName):
+    for pattern, ploidy in reversed(ploidies):
+        if fnmatch.fnmatchcase(chromosomeName, pattern):
+            return ploidy
+    assert False
 
 # Global constants:
 qualTable = [probCorrectFromAsciiCode(i) for i in range(128)]
@@ -247,19 +266,16 @@ def hetPhase(baseProbTable, genotype1, genotype2, preprocessedColumnPairs):
         return y2 + x2, q - p
 
 def lastGenotype(opts, args):
+    ploidies = list(ploidiesFromStrings(opts.ploidy))
+
     prog = os.path.basename(sys.argv[0])
     print "#", prog, " ".join(sys.argv[1:])
-
-    # xxx re-do this for each chromosome, to allow different ploidy?
-    genotypes = list(allGenotypes(alphabet, opts.ploidy))
 
     lastTrainFile = args[0]
     pairProbMatrix = alignmentProbMatrixFromLastTrainFile(lastTrainFile)
     conditionalProbMatrix = list(conditionalProbsFromPairProbs(pairProbMatrix))
     minCoverage = list(minCoveragePerRefBase(opts, conditionalProbMatrix))
     baseProbTable = list(twoStrandMatrix(conditionalProbMatrix))
-    genotypeProbTable = [list(probsForOneGenotype(baseProbTable, i))
-                         for i in genotypes]
 
     mafFiles = args[1:]
     incomingAlignments = mafInput(mafFiles)
@@ -284,6 +300,10 @@ def lastGenotype(opts, args):
             nextAlignment = alignments[alignmentPos]
             chrom = nextAlignment[0]
             coord = nextAlignment[1]
+            ploidy = ploidyOfChromosome(ploidies, chrom)
+            genotypes = list(allGenotypes(alphabet, ploidy))
+            genotypeProbTable = [list(probsForOneGenotype(baseProbTable, i))
+                                 for i in genotypes]
         while alignmentPos < alignmentCount:
             nextAlignment = alignments[alignmentPos]
             if nextAlignment[0] > chrom or nextAlignment[1] > coord:
@@ -301,7 +321,7 @@ def lastGenotype(opts, args):
             if all(i[1].upper() == refBase for i in columns):
                 break  # unnecessary, but makes it faster
             logProbs = list(logProbPerGenotype(genotypeProbTable, columns))
-            refGenotype = refBase * opts.ploidy
+            refGenotype = refBase * ploidy
             refLogProb = logProbs[genotypes.index(refGenotype)]
             s = sorted(zip(logProbs, genotypes))
             logProb1, genotype1 = s[-1]
@@ -342,7 +362,8 @@ if __name__ == "__main__":
     op.add_option("-m", "--min", type="float", default=6, metavar="INC", help=
                   "minimum increase in log10(likelihood) over "
                   "homozygous reference (default=%default)")
-    op.add_option("-p", "--ploidy", type="int", default=2, metavar="N",
+    op.add_option("-p", "--ploidy", action="append", metavar="N",
+                  default=["2", "chrY*:1", "chrM*:1"],
                   help="1=haploid, 2=diploid, etc (default=%default)")
     op.add_option("-f", "--furthest", type="float", metavar="BP", help=
                   "only use query sequences with colinear alignments "
@@ -351,8 +372,6 @@ if __name__ == "__main__":
                   "only use query sequences with strong splice signals "
                   "and a splice >= BP")
     opts, args = op.parse_args()
-    if opts.ploidy < 1:
-        op.error("ploidy must be at least 1")
     if not args:
         op.error("I need a last-train file and some MAF alignments")
     lastGenotype(opts, args)

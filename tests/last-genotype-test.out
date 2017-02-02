@@ -7,7 +7,8 @@ Options:
   -h, --help            show this help message and exit
   -m INC, --min=INC     minimum increase in log10(likelihood) over homozygous
                         reference (default=6)
-  -p N, --ploidy=N      1=haploid, 2=diploid, etc (default=2)
+  -p N, --ploidy=N      1=haploid, 2=diploid, etc (default=['2', 'chrY*:1',
+                        'chrM*:1'])
   -f BP, --furthest=BP  only use query sequences with colinear alignments
                         separated by <= BP
   -s BP, --splice=BP    only use query sequences with strong splice signals

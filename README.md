@@ -72,8 +72,8 @@ the `C` at 3213195 and `G` at 3223437 on the other chromosome.
   that, actually, a `C` was observed on the reverse strand.
 
 By default, `last-genotype` only shows sites with
-log10[ likelihood(predicted genotype) / likelihood(homozygous reference) ]
->= 6.
+log10[ likelihood(predicted genotype) / likelihood(homozygous reference) ] >=
+6.
 
 The output ends with a line like this:
 
@@ -103,7 +103,8 @@ are almost always between 50 and 10^6 bases.)
 - `-m INC`, `--min=INC`: minimum increase in log10(likelihood) over
   homozygous reference (default=6).
 
-- `-p N`, `--ploidy=N`: 1=haploid, 2=diploid, etc (default=2).
+- `-p N`, `--ploidy=N`: 1=haploid, 2=diploid, etc
+  (default=`'2,chrY*:1,chrM*:1'`).
 
 - `-f BP`, `--furthest=BP`: only use query sequences with colinear
   alignments separated by <= BP.
@@ -111,11 +112,39 @@ are almost always between 50 and 10^6 bases.)
 - `-s BP`, `--splice=BP`: only use query sequences with strong splice
   signals and least one splice >= BP.
 
-## Gimmick
+## Ploidy
 
-It can do arbitrary ploidy (hexaploid or whatever).
+You can specify ploidies with option `-p`.  Examples:
+
+* `-p1` : all chromosomes are haploid, i.e. just 1 copy.
+
+* `-p2` : all chromosomes are diploid, i.e. 2 copies (maternal and paternal).
+
+* `-p6` : all chromosomes are hexaploid.
+
+* `-p'chr21:3'` : `chr21` is triploid.
+
+* `-p'chr21*:3'` : all chromosomes whose names start with `chr21`
+  (e.g. `chr21_GL383579v2_alt`) are triploid.
+
+* `-p'2,chrW*:1,chrM*:1'` : all chromosomes are diploid, except those
+  whose names start with `chrW` or `chrM`, which are haploid.
+
+This option accepts one or more comma-separated ploidy specifications.
+Later specifications override earlier ones.  Your specifications are
+*appended* to the default ones.
+
+You can specify chromosome names using these symbols:
+
+    *        zero or more of any character
+    ?        any single character
+    [abc]    any character in abc
+    [!abc]   any character not in abc
 
 ## Limitations
+
+* It only finds substitutions (not deletions, insertions, inversions,
+  etc.)
 
 * Currently, `last-genotype` does not use per-base quality data
   (e.g. from fastq files).  This is because it was designed for reads
@@ -127,11 +156,9 @@ It can do arbitrary ploidy (hexaploid or whatever).
   cancer, where one site may have, say, 27% `A` and 73% `C`.  But it
   will often identify such sites as heterozygous, which may be useful.
 
+* Phasing is attempted only for diploid chromosomes.
+
 * For RNA reads: it makes no attempt to distinguish between genomic
   substitutions and RNA editing.  Also, if there is allele-biased
   expression (more RNAs from one allele), that may hide
   heterozygosity.
-
-* It does not allow different ploidies for different chromosomes
-  (e.g. X, Y, M).  This should be easy to implement, the main
-  difficulty is designing the program option.
