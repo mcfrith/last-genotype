@@ -1,7 +1,5 @@
 #! /bin/sh
 
-# XXX too slow
-
 try () {
     echo TEST "$@"
     eval "$@"
