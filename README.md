@@ -9,9 +9,9 @@ reference genome, from [LAST](http://last.cbrc.jp/) alignments of DNA
 You need to have standard code-building tools (e.g. git & make).  You
 can get and compile `last-genotype` like this:
 
-  git clone https://github.com/mcfrith/last-genotype.git
-  cd last-genotype
-  make
+    git clone https://github.com/mcfrith/last-genotype.git
+    cd last-genotype
+    make
 
 ## Usage
 
