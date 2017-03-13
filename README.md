@@ -162,3 +162,6 @@ You can specify chromosome names using these symbols:
   substitutions and RNA editing.  Also, if there is allele-biased
   expression (more RNAs from one allele), that may hide
   heterozygosity.
+
+* It doesn't allow varying ploidy *within* a chromosome
+  (e.g. pseudo-autosomal regions).
