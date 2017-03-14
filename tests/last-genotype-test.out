@@ -16,6 +16,7 @@ Options:
 TEST last-genotype hs-rna.mat hs-rna.maf
 # last-genotype hs-rna.mat hs-rna.maf
 # Minimum coverage per reference base: A=3 C=3 G=3 T=3
+# Query sequences used: 851
 # Alignments used: 3063
 chr11	237086	A	GG	22	2.1	AG	0	0	A%~ A'~ A2~ G<~ G=~ G=~ G?~ G?~ G@~ G@~ G@~ g"~ g<~ g<~ g?~ g?~ g?~
 chr11	244166	C	TT	22	4.2	CT	0	0	T$c T(r T5c T5c T5c T6f T9~ T9~ T9~ T9~ T:~ t$Z t$Z t%~ t/b t;~ t;~
@@ -44,6 +45,7 @@ chrY	13286839	C	A	7	6.2	G	0	0	A") A1~ A2% A2f a1O a3B
 TEST last-genotype -m5 hs-rna.mat hs-rna.maf
 # last-genotype -m5 hs-rna.mat hs-rna.maf
 # Minimum coverage per reference base: A=2 C=2 G=2 T=2
+# Query sequences used: 851
 # Alignments used: 3063
 chr11	214543	C	TT	5.4	0.88	CT	0	0	T>~ tA~ tA~
 chr11	237086	A	GG	22	2.1	AG	0	0	A%~ A'~ A2~ G<~ G=~ G=~ G?~ G?~ G@~ G@~ G@~ g"~ g<~ g<~ g?~ g?~ g?~
@@ -79,6 +81,7 @@ chrY	13287443	T	C	5.7	5.7	T	0	0	C7% C7H C9C c8D
 TEST last-genotype -p1 hs-rna.mat hs-rna.maf
 # last-genotype -p1 hs-rna.mat hs-rna.maf
 # Minimum coverage per reference base: A=3 C=3 G=3 T=3
+# Query sequences used: 851
 # Alignments used: 3063
 chr11	237086	A	G	22	22	A	0	0	A%~ A'~ A2~ G<~ G=~ G=~ G?~ G?~ G@~ G@~ G@~ g"~ g<~ g<~ g?~ g?~ g?~
 chr11	244166	C	T	22	22	C	0	0	T$c T(r T5c T5c T5c T6f T9~ T9~ T9~ T9~ T:~ t$Z t$Z t%~ t/b t;~ t;~
@@ -101,6 +104,7 @@ chrY	13286839	C	A	7	6.2	G	0	0	A") A1~ A2% A2f a1O a3B
 TEST last-genotype -p3 hs-rna.mat hs-rna.maf
 # last-genotype -p3 hs-rna.mat hs-rna.maf
 # Minimum coverage per reference base: A=3 C=3 G=3 T=3
+# Query sequences used: 851
 # Alignments used: 3063
 chr11	237086	A	GGG	22	0.84	AGG	0	0	A%~ A'~ A2~ G<~ G=~ G=~ G?~ G?~ G@~ G@~ G@~ g"~ g<~ g<~ g?~ g?~ g?~
 chr11	244166	C	TTT	22	2.5	CTT	0	0	T$c T(r T5c T5c T5c T6f T9~ T9~ T9~ T9~ T:~ t$Z t$Z t%~ t/b t;~ t;~
@@ -129,6 +133,7 @@ chrY	13286839	C	AAA	7	0.79	AAG	0	0	A") A1~ A2% A2f a1O a3B
 TEST last-genotype -f1e6 -s50 hs-rna.mat hs-rna.maf
 # last-genotype -f1e6 -s50 hs-rna.mat hs-rna.maf
 # Minimum coverage per reference base: A=3 C=3 G=3 T=3
+# Query sequences used: 540
 # Alignments used: 2609
 chr11	237086	A	GG	22	2.1	AG	0	0	A%~ A'~ A2~ G<~ G=~ G=~ G?~ G?~ G@~ G@~ G@~ g"~ g<~ g<~ g?~ g?~ g?~
 chr11	244166	C	TT	22	4.2	CT	0	0	T$c T(r T5c T5c T5c T6f T9~ T9~ T9~ T9~ T:~ t$Z t$Z t%~ t/b t;~ t;~
@@ -154,6 +159,7 @@ chr11	840476	A	AG	20	20	AA	66	64	A%l A.{ A.{ A<~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ A?~
 TEST last-genotype -f1000 hs-rna.mat hs-rna.maf
 # last-genotype -f1000 hs-rna.mat hs-rna.maf
 # Minimum coverage per reference base: A=3 C=3 G=3 T=3
+# Query sequences used: 407
 # Alignments used: 688
 chr11	308289	T	CC	11	1.9	CT	0	0	C%~ C/~ C>~ C>~ C?~ c?~ c@~
 chr11	308313	T	CC	14	2.3	CT	0	0	C0~ C7~ C9~ C<6 C<~ C=~ c=~ c>~
@@ -169,6 +175,7 @@ chrY	13286839	C	A	7	6.2	G	0	0	A") A1~ A2% A2f a1O a3B
 TEST last-genotype -p3,chr1*:1 hs-rna.mat hs-rna.maf
 # last-genotype -p3,chr1*:1 hs-rna.mat hs-rna.maf
 # Minimum coverage per reference base: A=3 C=3 G=3 T=3
+# Query sequences used: 851
 # Alignments used: 3063
 chr11	237086	A	G	22	22	A	0	0	A%~ A'~ A2~ G<~ G=~ G=~ G?~ G?~ G@~ G@~ G@~ g"~ g<~ g<~ g?~ g?~ g?~
 chr11	244166	C	T	22	22	C	0	0	T$c T(r T5c T5c T5c T6f T9~ T9~ T9~ T9~ T:~ t$Z t$Z t%~ t/b t;~ t;~
@@ -187,4 +194,44 @@ chr11	840318	C	T	45	45	C	0	0	C"~ C#~ C#~ C*~ C5~ C9~ C<~ C?~ CB~ CB~ CB~ CB~ CB~
 chrY	13286657	T	CCC	8.4	0.93	CCT	0	0	C;% C;) C;R C;S c<B c=O
 chrY	13286839	C	AAA	7	0.79	AAG	0	0	A") A1~ A2% A2f a1O a3B
 # Tested sites: 22134
+
+TEST last-genotype -f1000 hs-rna.mat hs-rna.maf hs-rna.maf
+# last-genotype -f1000 hs-rna.mat hs-rna.maf hs-rna.maf
+# Minimum coverage per reference base: A=3 C=3 G=3 T=3
+# Query sequences used: 814
+# Alignments used: 1376
+chr11	308289	T	CC	22	3.8	CT	0	0	C%~ C%~ C/~ C/~ C>~ C>~ C>~ C>~ C?~ C?~ c?~ c?~ c@~ c@~
+chr11	308313	T	CC	28	4.7	CT	0	0	C0~ C0~ C7~ C7~ C9~ C9~ C<6 C<6 C<~ C<~ C=~ C=~ c=~ c=~ c>~ c>~
+chr11	308362	G	CC	28	5.1	CT	0	0	C*^ C*^ C2~ C2~ C2~ C2~ C36 C36 C3~ C3~ C3~ C3~ C3~ C3~ c,~ c,~ c4~ c4~
+chr11	308425	G	CC	31	5.1	CT	0	0	C+q C+q C3O C3O C3[ C3[ C3] C3] C3~ C3~ C66 C66 C6~ C6~ c4~ c4~ c4~ c4~
+chr11	309126	A	AG	9.3	9.3	AA	0	0	AN~ AN~ AR~ AR~ A~~ A~~ A~~ A~~ G?~ G?~ G@~ G@~ G@~ G@~ aH~ aH~ g?~ g?~
+chr11	314206	C	CG	9.7	0.5	GG	0	0	C$~ C$~ C$~ C$~ C$~ C$~ C$~ C$~ C$~ C$~ C$~ C$~ G-~ G-~ G-~ G-~ G-~ G-~ G-~ G-~ G-~ G-~ a.~ a.~ c$~ c$~ c$~ c$~ c$~ c$~ c*~ c*~ g,~ g,~ g,~ g,~
+chr11	563651	A	AG	6.5	6.5	AA	0	0	AI~ AI~ AR~ AR~ AR~ AR~ G@~ G@~ a<~ a<~ aR~ aR~ g<~ g<~ g<~ g<~
+chr11	614863	C	TT	7.1	1.2	CT	0	0	T<~ T<~ t<~ t<~
+chr11	727309	T	CC	7.3	1.2	CT	0	0	C=~ C=~ c;~ c;~
+chr11	727451	C	TT	10	1.8	CT	0	0	T<~ T<~ T<~ T<~ t6~ t6~
+chr11	838418	A	GG	9.5	2.1	AG	0	0	G)~ G)~ G.~ G.~ g.~ g.~ g3~ g3~
+chr11	838423	C	TT	9.7	1.4	CT	0	0	C#~ C#~ T=~ T=~ c"~ c"~ t5~ t5~ t?~ t?~
+chr11	838541	C	CT	7	1.5	TT	0	0	C#~ C#~ T7~ T7~ c!~ c!~ cN~ cN~ t0~ t0~ t<~ t<~
+chr11	838633	C	GG	9.4	1.6	CG	0	0	G2~ G2~ c"~ c"~ g1~ g1~ g1~ g1~
+chr11	838671	C	CT	10	7	TT	11	12	CL~ CL~ T;~ T;~ T;~ T;~ cL~ cL~ c~~ c~~ t>~ t>~ t>~ t>~
+chr11	838759	T	TA	11	3.5	AA	11	14	A2~ A2~ A3~ A3~ G3~ G3~ T*[ T*[ T0~ T0~ a+~ a+~ a2~ a2~ a2~ a2~ t3~ t3~
+chr11	840250	C	GG	2.3e+02	37	AG	0	0	A6~ A6~ A6~ A6~ G)~ G)~ G0~ G0~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ G2~ c)~ c)~ g#~ g#~ g(~ g(~ g)~ g)~ g.~ g.~ g/~ g/~ g/~ g/~ g0~ g0~ g0~ g0~ g0~ g0~ g0~ g0~ g0~ g0~ g0~ g0~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g1~ g6~ g6~ g6~ g6~ g6~ g6~ g6~ g6~ g6~ g6~ g6~ g6~
+chr11	840318	C	CT	1.2e+02	99	TT	0	0	C"~ C"~ C#~ C#~ C*~ C*~ C<~ C<~ CQ~ CQ~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ CR~ C~~ C~~ C~~ C~~ C~~ C~~ T,~ T,~ T/~ T/~ T4~ T4~ T7~ T7~ T8~ T8~ T8~ T8~ T?~ T?~ c"~ c"~ c+~ c+~ c3~ c3~ c5~ c5~ c9~ c9~ c<~ c<~ c<~ c<~ cD~ cD~ cI~ cI~ cJ~ cJ~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ cR~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ c~~ t$~ t$~ t*~ t*~ t+~ t+~ t,~ t,~ t.~ t.~ t.~ t.~ t0~ t0~ t5~ t5~ t6~ t6~ t:~ t:~ t;~ t;~ t;~ t;~ t?~ t?~ t?~ t?~ t?~ t?~ t@~ t@~ t@~ t@~ t@~ t@~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~ tA~
+chr11	840476	A	AG	37	37	AA	1.6e+02	154	A&` A&` A'? A'? A:` A:` A:` A:` A:` A:` A:` A:` AEN AEN AEN AEN A~] A~] A~` A~` A~` A~` G(J G(J G(M G(M G(M G(M G)M G)M G,J G,J G,~ G,~ G-P G-P G-P G-P a%K a%K a-O a-O a.X a.X a/Z a/Z a1& a1& a2= a2= a3~ a3~ a:` a:` a:` a:` a>Z a>Z a>Z a>Z a?Z a?Z a?Z a?Z a?Z a?Z a?c a?c a?c a?c a?c a?c a?c a?c a?c a?c a?c a?c a?~ a?~ a?~ a?~ a@c a@c a@c a@c aEN aEN a~c a~c a~c a~c a~c a~c a~c a~c g'I g'I g'L g'L g'L g'L g'L g'L g'M g'M g+F g+F g+F g+F g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+O g+q g+q g,F g,F g,O g,O g,O g,O g,O g,O g,O g,O g,O g,O g,O g,O g,O g,O g,O g,O g,~ g,~ g1; g1; g1; g1;
+chrY	13286617	G	A	10	10	G	0	0	A%R A%R A,% A,% A<) A<) a:B a:B a:O a:O
+chrY	13286629	C	G	8.5	7.7	T	0	0	G.% G.% G.R G.R G6) G6) g4B g4B t%O t%O
+chrY	13286657	T	C	17	17	T	0	0	C;% C;% C;) C;) C;R C;R C;S C;S c<B c<B c=O c=O
+chrY	13286839	C	A	14	12	G	0	0	A") A") A1~ A1~ A2% A2% A2f A2f a1O a1O a3B a3B
+chrY	13286873	T	G	11	10	A	0	0	G2% G2% G2f G2f g2O g2O g6B g6B
+chrY	13287016	G	A	6.9	6.9	G	0	0	A/P A/P A=% A=% a>O a>O
+chrY	13287116	T	C	8.5	8.5	T	0	0	C$% C$% C<C C<C T#P T#P c,) c,) c=O c=O
+chrY	13287173	A	T	7.6	6.9	C	0	0	T1C T1C t.) t.) t1O t1O
+chrY	13287200	C	T	7.4	7.4	C	0	0	T4C T4C T<% T<% t>O t>O
+chrY	13287350	T	C	12	12	T	0	0	C;C C;C C<% C<% C<H C<H c=H c=H
+chrY	13287385	T	C	9.6	9.6	T	0	0	C<% C<% C<H C<H c;) c;) c=D c=D
+chrY	13287440	A	C	9	8.4	T	0	0	C.% C.% C.H C.H C1C C1C c.D c.D
+chrY	13287443	T	C	11	11	T	0	0	C7% C7% C7H C7H C9C C9C c8D c8D
+chrY	18992579	T	A	7.1	6.1	G	0	0	A4? A4? T"# T"# a3U a3U
+# Tested sites: 10580
 

@@ -20,6 +20,7 @@ using namespace mcf;
 typedef unsigned char uchar;
 typedef const char *const_char_p;
 
+const size_t maxSize = -1;
 const size_t numOfChars = UCHAR_MAX + 1;
 const unsigned alphLen = 4;
 const unsigned alphLen2 = alphLen * 2;
@@ -56,7 +57,7 @@ static const uchar *columnFromAlignment(const Alignment &a, size_t coord) {
 }
 
 static size_t alignmentDistance(const Alignment &a, const Alignment &b) {
-  return a.end <= b.beg ? b.beg - a.end : -1;
+  return a.end <= b.beg ? b.beg - a.end : maxSize;
 }
 
 static bool isLessByGenome(const Alignment &a, const Alignment &b) {
@@ -77,10 +78,6 @@ static bool isLessByAscii(const AlignedBaseText &a, const AlignedBaseText &b) {
 
 static void err(const std::string& s) {
   throw std::runtime_error(s);
-}
-
-static bool isMaxSize(size_t x) {
-  return x + 1 == 0;
 }
 
 static StringView &munch(StringView &in, const char *text) {
@@ -304,9 +301,9 @@ static void makeSeqCodeTables(uchar seqCodeTables[][numOfChars]) {
 }
 
 static size_t basesBetweenAlignments(const Alignment &a, const Alignment &b) {
-  if (a.refSeqNum != b.refSeqNum) return -1;
+  if (a.refSeqNum != b.refSeqNum) return maxSize;
   unsigned s = alignmentStrandNum(a);
-  if (s != alignmentStrandNum(b)) return -1;
+  if (s != alignmentStrandNum(b)) return maxSize;
   return (s == 0) ? alignmentDistance(a, b) : alignmentDistance(b, a);
 }
 
@@ -317,10 +314,10 @@ static bool isGoodAlignments(const LastGenotypeArguments &args,
   for ( ; beg < end - 1; ++beg) {
     size_t d = basesBetweenAlignments(beg[0], beg[1]);
     if (args.furthest >= 0) {
-      if (isMaxSize(d) || d > args.furthest) return false;
+      if (d == maxSize || d > args.furthest) return false;
     }
     if (args.splice >= 0) {
-      if (!isMaxSize(d) && d >= args.splice) isGood = true;
+      if (d < maxSize && d >= args.splice) isGood = true;
     }
   }
   return isGood;
@@ -439,13 +436,13 @@ static void addAlignment(vector<Alignment> &alignments,
 static void readMaf(const LastGenotypeArguments &args,
 		    vector<Alignment> &alignments,
 		    vector<std::string> &refSeqNames,
+		    size_t &queryCount,
 		    std::istream &in) {
   uchar seqCodeTables[3][numOfChars];
   makeSeqCodeTables(seqCodeTables);
 
   bool isBad = false;
-  size_t queryCount = 0;
-  size_t queryStart = 0;
+  size_t queryStart = alignments.size();
   unsigned sLineCount = 0;
   unsigned pLineCount = 0;
   std::string aLine;
@@ -496,15 +493,20 @@ static void readMaf(const LastGenotypeArguments &args,
 static void readAlignmentFiles(const LastGenotypeArguments &args,
 			       vector<Alignment> &alignments,
 			       vector<std::string> &refSeqNames) {
+  size_t queryCount = 0;
+
   if (*args.mafFiles) {
     for (char **i = args.mafFiles; *i; ++i) {
       std::ifstream ifs;
       std::istream &in = openIn(*i, ifs);
-      readMaf(args, alignments, refSeqNames, in);
+      readMaf(args, alignments, refSeqNames, queryCount, in);
     }
   } else {
-    readMaf(args, alignments, refSeqNames, std::cin);
+    readMaf(args, alignments, refSeqNames, queryCount, std::cin);
   }
+
+  std::cout << "# Query sequences used: " << queryCount << '\n';
+  std::cout << "# Alignments used: " << alignments.size() << '\n';
 }
 
 static size_t preprocessColumns(const double *qualTable, size_t coord,
@@ -720,7 +722,6 @@ void lastGenotype(const LastGenotypeArguments &args) {
   vector<Alignment> alignments;
   vector<std::string> refSeqNames;
   readAlignmentFiles(args, alignments, refSeqNames);
-  std::cout << "# Alignments used: " << alignments.size() << '\n';
   sort(alignments.begin(), alignments.end(), isLessByGenome);
 
   size_t numOfTestedSites = 0;
