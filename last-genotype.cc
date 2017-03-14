@@ -488,6 +488,8 @@ static void readMaf(const LastGenotypeArguments &args,
       sLineCount = pLineCount = 0;
     }
   } while (in);
+
+  discardBadAlignments(args, alignments, queryStart, queryCount);
 }
 
 static void readAlignmentFiles(const LastGenotypeArguments &args,
