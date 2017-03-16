@@ -575,18 +575,26 @@ static void calcLogProbs(const double *genotypeCalcMatrix,
   for (size_t i = 0; i < numOfGenotypes; ++i) {
     const double *g = &genotypeCalcMatrix[alphLen2 * i];
     double logProb = 0;
-    for (size_t j = 0; j < numOfBases; ++j) {
+    for (size_t j = 0; j < numOfBases; ) {
       // Tests on chimera h007:
       // last-genotype -f1e6 -s50 lc2adbulk2-pass_2d.mat
       //                          lc2adbulk2-pass_2d-d90-m50-j4.maf
+      // Times without batching:
       // log10: about 12 seconds
       // log: about 11 seconds
       // log2: about 7.6 seconds
       // log2f: about 6.6 seconds
       // log1p: about 6.2 seconds
       // log1pf: about 6.3 seconds
-      logProb += log1p(colProbs[j] * g[colBases[j]]);
-      // xxx could be log 0, which should be -inf
+      // With batching: got overflow with batchSize 256, but not 128
+      // batchSize 64 was reproducibly faster than 32
+      const unsigned batchSize = 64;
+      size_t end = std::min(j + batchSize, numOfBases);
+      double prob = 1;
+      for (; j < end; ++j) {
+	prob *= colProbs[j] * g[colBases[j]] + 1;
+      }
+      logProb += myLog(prob);  // xxx could be log 0, which should be -inf
     }
     genotypeLogProbs[i] = logProb;
   }
