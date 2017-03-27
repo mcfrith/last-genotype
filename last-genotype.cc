@@ -397,7 +397,7 @@ static void checkSequenceLength(StringView sequence, size_t length) {
 }
 
 static uchar *alignmentColumns(uchar seqCodeTables[][numOfChars],
-			       size_t rLen,
+			       size_t colBytes,
 			       StringView strand,
 			       StringView rSeq,
 			       StringView qSeq,
@@ -409,7 +409,7 @@ static uchar *alignmentColumns(uchar seqCodeTables[][numOfChars],
   if (pLineCount > 1) checkSequenceLength(probSeqs[1], n);
   const uchar *rTable = seqCodeTables[0];
   const uchar *qTable = seqCodeTables[(strand[0] == '-') ? 2 : 1];
-  uchar *columns = new uchar[rLen * 3];
+  uchar *columns = new uchar[colBytes];
   uchar *c = columns;
   for (size_t i = 0; i < n; ++i) {
     uchar r = rSeq[i];
@@ -481,7 +481,8 @@ static void readMaf(const LastGenotypeArguments &args,
 	if (!isBad) {
 	  size_t refSeqNum = stringIndex(refSeqNames, rName);
 	  size_t rLen = alignmentSpan(rSeq);
-	  uchar *columns = alignmentColumns(seqCodeTables, rLen, strand,
+	  size_t colBytes = rLen * 3;
+	  uchar *columns = alignmentColumns(seqCodeTables, colBytes, strand,
 					    rSeq, qSeq, probSeqs, pLineCount);
 	  addAlignment(alignments, refSeqNum, rBeg, rLen, queryCount, columns);
 	}
@@ -509,6 +510,8 @@ static void readAlignmentFiles(const LastGenotypeArguments &args,
   } else {
     readMaf(args, alignments, refSeqNames, queryCount, std::cin);
   }
+
+  sort(alignments.begin(), alignments.end(), isLessByGenome);
 
   std::cout << "# Query sequences used: " << queryCount << '\n';
   std::cout << "# Alignments used: " << alignments.size() << '\n';
@@ -737,7 +740,6 @@ void lastGenotype(const LastGenotypeArguments &args) {
   vector<Alignment> alignments;
   vector<std::string> refSeqNames;
   readAlignmentFiles(args, alignments, refSeqNames);
-  sort(alignments.begin(), alignments.end(), isLessByGenome);
 
   size_t numOfTestedSites = 0;
   size_t alignmentPos = 0;
