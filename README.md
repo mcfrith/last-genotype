@@ -105,6 +105,15 @@ colinear, with no splice > 10^6 bases, strong splice signals
 (e.g. `GT`-`AG`), and at least one splice >= 50 bases.  (Human introns
 are almost always between 50 and 10^6 bases.)
 
+## Big input data
+
+`last-genotype` needs to hold intermediate data of comparable size to
+the input.  If this is very large, temporary files will be used.  It's
+necessary to put the temporary files on a large enough (and preferably
+fast) disk: you can control this with the `-T` option or `TMPDIR`
+environment variable.  The temporary files are not visible as normal
+files, but you can measure disk usage with a command such as `df -h`.
+
 ## Options
 
 - `-h`, `--help`: show a help message and exit.
@@ -120,6 +129,15 @@ are almost always between 50 and 10^6 bases.)
 
 - `-s BP`, `--splice=BP`: only use query sequences with strong splice
   signals and least one splice >= BP.
+
+- `-S SIZE`, `--buffer-size=SIZE`: maximum amount of memory to use
+  (roughly).  E.g. `32G` means 32 GibiBytes.
+
+- `-T DIR`, `--temporary-directory=DIR`: put temporary files in this
+  directory.  The default is to use the `TMPDIR` environment variable,
+  or if that is not specified, `/tmp`.
+
+- `-v`, `--verbose`: show progress messages.
 
 ## Ploidy
 
