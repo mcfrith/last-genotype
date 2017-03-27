@@ -514,7 +514,6 @@ static void readAlignmentFiles(const LastGenotypeArguments &args,
   sort(alignments.begin(), alignments.end(), isLessByGenome);
 
   std::cout << "# Query sequences used: " << queryCount << '\n';
-  std::cout << "# Alignments used: " << alignments.size() << '\n';
 }
 
 static size_t preprocessColumns(const double *qualTable, size_t coord,

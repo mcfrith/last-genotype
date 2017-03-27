@@ -17,7 +17,6 @@ TEST last-genotype hs-rna.mat hs-rna.maf
 # last-genotype hs-rna.mat hs-rna.maf
 # Minimum coverage per reference base: A=3 C=3 G=3 T=3
 # Query sequences used: 852
-# Alignments used: 3063
 chr11	237086	A	GG	22	2.1	AG	0	0	A%~ A'~ A2~ G<~ G=~ G=~ G?~ G?~ G@~ G@~ G@~ g"~ g<~ g<~ g?~ g?~ g?~
 chr11	244166	C	TT	22	4.2	CT	0	0	T$c T(r T5c T5c T5c T6f T9~ T9~ T9~ T9~ T:~ t$Z t$Z t%~ t/b t;~ t;~
 chr11	244170	T	CC	25	4.3	CT	0	0	C&t C5~ C7u C7u C8u C9~ C9~ C9~ C9~ C9~ C:y T$h c)] c)] c/~ c:~ c:~
@@ -46,7 +45,6 @@ TEST last-genotype -m5 hs-rna.mat hs-rna.maf
 # last-genotype -m5 hs-rna.mat hs-rna.maf
 # Minimum coverage per reference base: A=2 C=2 G=2 T=2
 # Query sequences used: 852
-# Alignments used: 3063
 chr11	214543	C	TT	5.4	0.88	CT	0	0	T>~ tA~ tA~
 chr11	237086	A	GG	22	2.1	AG	0	0	A%~ A'~ A2~ G<~ G=~ G=~ G?~ G?~ G@~ G@~ G@~ g"~ g<~ g<~ g?~ g?~ g?~
 chr11	244166	C	TT	22	4.2	CT	0	0	T$c T(r T5c T5c T5c T6f T9~ T9~ T9~ T9~ T:~ t$Z t$Z t%~ t/b t;~ t;~
@@ -82,7 +80,6 @@ TEST last-genotype -p1 hs-rna.mat hs-rna.maf
 # last-genotype -p1 hs-rna.mat hs-rna.maf
 # Minimum coverage per reference base: A=3 C=3 G=3 T=3
 # Query sequences used: 852
-# Alignments used: 3063
 chr11	237086	A	G	22	22	A	0	0	A%~ A'~ A2~ G<~ G=~ G=~ G?~ G?~ G@~ G@~ G@~ g"~ g<~ g<~ g?~ g?~ g?~
 chr11	244166	C	T	22	22	C	0	0	T$c T(r T5c T5c T5c T6f T9~ T9~ T9~ T9~ T:~ t$Z t$Z t%~ t/b t;~ t;~
 chr11	244170	T	C	25	25	T	0	0	C&t C5~ C7u C7u C8u C9~ C9~ C9~ C9~ C9~ C:y T$h c)] c)] c/~ c:~ c:~
@@ -105,7 +102,6 @@ TEST last-genotype -p3 hs-rna.mat hs-rna.maf
 # last-genotype -p3 hs-rna.mat hs-rna.maf
 # Minimum coverage per reference base: A=3 C=3 G=3 T=3
 # Query sequences used: 852
-# Alignments used: 3063
 chr11	237086	A	GGG	22	0.84	AGG	0	0	A%~ A'~ A2~ G<~ G=~ G=~ G?~ G?~ G@~ G@~ G@~ g"~ g<~ g<~ g?~ g?~ g?~
 chr11	244166	C	TTT	22	2.5	CTT	0	0	T$c T(r T5c T5c T5c T6f T9~ T9~ T9~ T9~ T:~ t$Z t$Z t%~ t/b t;~ t;~
 chr11	244170	T	CCC	25	2.5	CCT	0	0	C&t C5~ C7u C7u C8u C9~ C9~ C9~ C9~ C9~ C:y T$h c)] c)] c/~ c:~ c:~
@@ -134,7 +130,6 @@ TEST last-genotype -f1e6 -s50 hs-rna.mat hs-rna.maf
 # last-genotype -f1e6 -s50 hs-rna.mat hs-rna.maf
 # Minimum coverage per reference base: A=3 C=3 G=3 T=3
 # Query sequences used: 540
-# Alignments used: 2609
 chr11	237086	A	GG	22	2.1	AG	0	0	A%~ A'~ A2~ G<~ G=~ G=~ G?~ G?~ G@~ G@~ G@~ g"~ g<~ g<~ g?~ g?~ g?~
 chr11	244166	C	TT	22	4.2	CT	0	0	T$c T(r T5c T5c T5c T6f T9~ T9~ T9~ T9~ T:~ t$Z t$Z t%~ t/b t;~ t;~
 chr11	244170	T	CC	25	4.3	CT	0	0	C&t C5~ C7u C7u C8u C9~ C9~ C9~ C9~ C9~ C:y T$h c)] c)] c/~ c:~ c:~
@@ -160,7 +155,6 @@ TEST last-genotype -f1000 hs-rna.mat hs-rna.maf
 # last-genotype -f1000 hs-rna.mat hs-rna.maf
 # Minimum coverage per reference base: A=3 C=3 G=3 T=3
 # Query sequences used: 408
-# Alignments used: 688
 chr11	308289	T	CC	11	1.9	CT	0	0	C%~ C/~ C>~ C>~ C?~ c?~ c@~
 chr11	308313	T	CC	14	2.3	CT	0	0	C0~ C7~ C9~ C<6 C<~ C=~ c=~ c>~
 chr11	308362	G	CC	14	2.5	CT	0	0	C*^ C2~ C2~ C36 C3~ C3~ C3~ c,~ c4~
@@ -176,7 +170,6 @@ TEST last-genotype -p3,chr1*:1 hs-rna.mat hs-rna.maf
 # last-genotype -p3,chr1*:1 hs-rna.mat hs-rna.maf
 # Minimum coverage per reference base: A=3 C=3 G=3 T=3
 # Query sequences used: 852
-# Alignments used: 3063
 chr11	237086	A	G	22	22	A	0	0	A%~ A'~ A2~ G<~ G=~ G=~ G?~ G?~ G@~ G@~ G@~ g"~ g<~ g<~ g?~ g?~ g?~
 chr11	244166	C	T	22	22	C	0	0	T$c T(r T5c T5c T5c T6f T9~ T9~ T9~ T9~ T:~ t$Z t$Z t%~ t/b t;~ t;~
 chr11	244170	T	C	25	25	T	0	0	C&t C5~ C7u C7u C8u C9~ C9~ C9~ C9~ C9~ C:y T$h c)] c)] c/~ c:~ c:~
@@ -199,7 +192,6 @@ TEST last-genotype -f1000 hs-rna.mat hs-rna.maf hs-rna.maf
 # last-genotype -f1000 hs-rna.mat hs-rna.maf hs-rna.maf
 # Minimum coverage per reference base: A=3 C=3 G=3 T=3
 # Query sequences used: 816
-# Alignments used: 1376
 chr11	308289	T	CC	22	3.8	CT	0	0	C%~ C%~ C/~ C/~ C>~ C>~ C>~ C>~ C?~ C?~ c?~ c?~ c@~ c@~
 chr11	308313	T	CC	28	4.7	CT	0	0	C0~ C0~ C7~ C7~ C9~ C9~ C<6 C<6 C<~ C<~ C=~ C=~ c=~ c=~ c>~ c>~
 chr11	308362	G	CC	28	5.1	CT	0	0	C*^ C*^ C2~ C2~ C2~ C2~ C36 C36 C3~ C3~ C3~ C3~ C3~ C3~ c,~ c,~ c4~ c4~
