@@ -12,6 +12,8 @@ Options:
                         separated by <= BP
   -s BP, --splice=BP    only use query sequences with strong splice signals
                         and a splice >= BP
+  -S SIZE, --buffer-size=SIZE        memory limit (default=16G)
+  -T DIR, --temporary-directory=DIR  put temporary files in DIR
 
 TEST last-genotype hs-rna.mat hs-rna.maf
 # last-genotype hs-rna.mat hs-rna.maf

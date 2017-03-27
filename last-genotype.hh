@@ -1,5 +1,6 @@
 // Copyright 2017 Martin C. Frith
 
+#include <stddef.h>
 #include <vector>
 
 struct LastGenotypeArguments {
@@ -8,6 +9,8 @@ struct LastGenotypeArguments {
   std::vector<const char *> ploidy;
   double furthest;
   double splice;
+  size_t buffer_size;
+  const char *temporary_directory;
   const char *lastTrainFile;
   char **mafFiles;
 };

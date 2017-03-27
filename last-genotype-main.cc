@@ -5,16 +5,42 @@
 #include <getopt.h>
 
 #include <cstdlib>  // EXIT_SUCCESS, EXIT_FAILURE
+#include <cstring>
 #include <iostream>
 #include <stdexcept>
 #include <sstream>
 #include <string>
+
+const size_t maxSize = -1;
 
 static double doubleFromString(const char *s) {
   char *e;
   double x = std::strtod(s, &e);
   if (e == s) throw std::runtime_error("bad number");
   return x;  // xxx check overflow?
+}
+
+static size_t sizeFromString(const std::string &s) {
+  std::istringstream iss(s);
+  size_t x;
+  iss >> x;
+  if (!iss) throw std::runtime_error("bad size: " + s);
+  char suffix = 'K';
+  iss.get(suffix);
+  const char *i = "bKMGTP";
+  const char *j = std::strchr(i, suffix);
+  if (!j || iss.get(suffix)) throw std::runtime_error("bad size: " + s);
+  for (; i < j; ++i) {
+    if (x > maxSize / 1024) throw std::runtime_error("too big: " + s);
+    x *= 1024;
+  }
+  return x;
+}
+
+static size_t defaultBufferSize() {
+  size_t s = 16;
+  for (int i = 0; i < 30 && s <= maxSize / 2; ++i) s *= 2;
+  return s;
 }
 
 static void run(int argc, char **argv) {
@@ -24,6 +50,8 @@ static void run(int argc, char **argv) {
   args.ploidy.push_back("2,chrY*:1,chrM*:1");
   args.furthest = -1;
   args.splice = -1;
+  args.buffer_size = defaultBufferSize();
+  args.temporary_directory = 0;
 
   std::ostringstream help;
   help << "\
@@ -41,18 +69,23 @@ Options:\n\
                         separated by <= BP\n\
   -s BP, --splice=BP    only use query sequences with strong splice signals\n\
                         and a splice >= BP\n\
+  -S SIZE, --buffer-size=SIZE        memory limit (default="
+       << (args.buffer_size / 1024 / 1024 / 1024) << "G)\n\
+  -T DIR, --temporary-directory=DIR  put temporary files in DIR\n\
   -V, --version         show version number and exit\n\
 ";
 
-  const char sOpts[] = "hm:p:f:s:V";
+  const char sOpts[] = "hm:p:f:s:S:T:V";
 
   static struct option lOpts[] = {
-    { "help",     no_argument,       0, 'h' },
-    { "min",      required_argument, 0, 'm' },
-    { "ploidy",   required_argument, 0, 'p' },
-    { "furthest", required_argument, 0, 'f' },
-    { "splice",   required_argument, 0, 's' },
-    { "version",  no_argument,       0, 'V' },
+    { "help",                no_argument,       0, 'h' },
+    { "min",                 required_argument, 0, 'm' },
+    { "ploidy",              required_argument, 0, 'p' },
+    { "furthest",            required_argument, 0, 'f' },
+    { "splice",              required_argument, 0, 's' },
+    { "buffer-size",         required_argument, 0, 'S' },
+    { "temporary-directory", required_argument, 0, 'T' },
+    { "version",             no_argument,       0, 'V' },
     { 0, 0, 0, 0}
   };
 
@@ -73,6 +106,12 @@ Options:\n\
       break;
     case 's':
       args.splice = doubleFromString(optarg);
+      break;
+    case 'S':
+      args.buffer_size = sizeFromString(optarg);
+      break;
+    case 'T':
+      args.temporary_directory = optarg;
       break;
     case 'V':
       std::cout << "last-genotype "

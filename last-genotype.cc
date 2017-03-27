@@ -3,6 +3,7 @@
 #include "last-genotype.hh"
 
 #include "mcf_string_view.hh"
+#include "mcf_tmpfile.hh"
 
 #include <fnmatch.h>
 
@@ -50,6 +51,10 @@ struct AlignedBaseText {
 
 static unsigned alignmentStrandNum(const Alignment &a) {
   return a.columns[0] % 2;
+}
+
+static size_t bytesInColumns(const Alignment &a) {
+  return (a.end - a.beg) * 3;
 }
 
 static const uchar *columnFromAlignment(const Alignment &a, size_t coord) {
@@ -372,7 +377,7 @@ static bool isBadQuery(const LastGenotypeArguments &args,
 
 static void doOneQuery(const LastGenotypeArguments &args,
 		       vector<Alignment> &alignments,
-		       size_t &queryStart, size_t &queryCount) {
+		       size_t &queryStart, size_t &queryCount, size_t &bytes) {
   size_t s = alignments.size();
   if (queryStart >= s) return;
   const Alignment *a = &alignments[0];
@@ -381,8 +386,9 @@ static void doOneQuery(const LastGenotypeArguments &args,
     ++queryCount;
   } else {
     while (s > queryStart) {
-      --s;
-      delete[] alignments[s].columns;
+      const Alignment &a = alignments[--s];
+      delete[] a.columns;
+      bytes -= bytesInColumns(a) + sizeof a;
     }
     alignments.resize(s);
   }
@@ -436,10 +442,35 @@ static void addAlignment(vector<Alignment> &alignments,
   alignments.push_back(a);
 }
 
+static void writeOrDie(const void *beg, size_t len, FILE *f) {
+  if (!fwrite(beg, len, 1, f)) err("error writing temporary file");
+}
+
+static void dumpAlignments(const LastGenotypeArguments &args,
+			   vector<Alignment> &alignments,
+			   vector<FILE *> &tempFiles,
+			   size_t &bytes,
+			   size_t numOfAlignments) {
+  FILE *f = tmpFile(args.temporary_directory);
+  tempFiles.push_back(f);
+  for (size_t i = 0; i < numOfAlignments; ++i) {
+    const Alignment &a = alignments[i];
+    size_t colBytes = bytesInColumns(a);
+    writeOrDie(&a, offsetof(Alignment, columns), f);
+    writeOrDie(a.columns, colBytes, f);
+    delete[] a.columns;
+    bytes -= colBytes + sizeof a;
+  }
+  if (fseek(f, 0, SEEK_SET) != 0) err("fseek temporary file failed");
+  alignments.erase(alignments.begin(), alignments.begin() + numOfAlignments);
+}
+
 static void readMaf(const LastGenotypeArguments &args,
 		    vector<Alignment> &alignments,
 		    vector<std::string> &refSeqNames,
+		    vector<FILE *> &tempFiles,
 		    size_t &queryCount,
+		    size_t &bytes,
 		    std::istream &in) {
   uchar seqCodeTables[3][numOfChars];
   makeSeqCodeTables(seqCodeTables);
@@ -475,13 +506,20 @@ static void readMaf(const LastGenotypeArguments &args,
 	parseTopSeq(sLines[0], rName, rBeg, rSeq);
 	parseBotSeq(sLines[1], qName, strand, qSeq);
 	if (qName != qNameOld) {
-	  doOneQuery(args, alignments, queryStart, queryCount);
+	  doOneQuery(args, alignments, queryStart, queryCount, bytes);
 	  isBad = isBadQuery(args, aLine);
 	}
 	if (!isBad) {
 	  size_t refSeqNum = stringIndex(refSeqNames, rName);
 	  size_t rLen = alignmentSpan(rSeq);
 	  size_t colBytes = rLen * 3;
+	  bytes += colBytes + sizeof(Alignment);
+	  if (bytes > args.buffer_size && queryStart > 0) {
+	    sort(alignments.begin(),
+		 alignments.begin() + queryStart, isLessByGenome);
+	    dumpAlignments(args, alignments, tempFiles, bytes, queryStart);
+	    queryStart = 0;
+	  }
 	  uchar *columns = alignmentColumns(seqCodeTables, colBytes, strand,
 					    rSeq, qSeq, probSeqs, pLineCount);
 	  addAlignment(alignments, refSeqNum, rBeg, rLen, queryCount, columns);
@@ -493,25 +531,31 @@ static void readMaf(const LastGenotypeArguments &args,
     }
   } while (in);
 
-  doOneQuery(args, alignments, queryStart, queryCount);
+  doOneQuery(args, alignments, queryStart, queryCount, bytes);
 }
 
 static void readAlignmentFiles(const LastGenotypeArguments &args,
 			       vector<Alignment> &alignments,
-			       vector<std::string> &refSeqNames) {
+			       vector<std::string> &refSeqNames,
+			       vector<FILE *> &tempFiles) {
   size_t queryCount = 0;
+  size_t bytes = 0;
 
   if (*args.mafFiles) {
     for (char **i = args.mafFiles; *i; ++i) {
       std::ifstream ifs;
       std::istream &in = openIn(*i, ifs);
-      readMaf(args, alignments, refSeqNames, queryCount, in);
+      readMaf(args, alignments, refSeqNames, tempFiles, queryCount, bytes, in);
     }
   } else {
-    readMaf(args, alignments, refSeqNames, queryCount, std::cin);
+    readMaf(args, alignments, refSeqNames, tempFiles, queryCount, bytes,
+	    std::cin);
   }
 
   sort(alignments.begin(), alignments.end(), isLessByGenome);
+  if (!tempFiles.empty() && !alignments.empty()) {
+    dumpAlignments(args, alignments, tempFiles, bytes, alignments.size());
+  }
 
   std::cout << "# Query sequences used: " << queryCount << '\n';
 }
@@ -706,6 +750,8 @@ void discardOldAlignments(vector<Alignment> &alignments, size_t coord) {
   for (size_t i = 0; i < n; ++i) {
     if (alignments[i].end > coord) {
       alignments[j++] = alignments[i];
+    } else {
+      delete[] alignments[i].columns;
     }
   }
   alignments.resize(j);
@@ -718,6 +764,47 @@ static void printArgs(char **argv) {
   std::cout << '#';
   for (char **i = argv; *i; ++i) std::cout << ' ' << *i;
   std::cout << '\n';
+}
+
+static void loadAlignments(vector<Alignment> &v, FILE *f, size_t partBytes) {
+  size_t bytesSoFar = 0;
+  Alignment a;
+  while (fread(&a, offsetof(Alignment, columns), 1, f)) {
+    size_t colBytes = bytesInColumns(a);
+    a.columns = new uchar[colBytes];
+    if (!fread(a.columns, colBytes, 1, f)) err("can't read temporary file");
+    v.push_back(a);
+    bytesSoFar += colBytes + sizeof a;
+    if (bytesSoFar >= partBytes) break;
+  }
+  if (ferror(f)) err("error reading temporary file");
+  reverse(v.begin(), v.end());
+}
+
+static void putMinPartFirst(vector<vector<Alignment> > &mergeParts,
+			    vector<std::FILE *> &tempFiles) {
+  size_t i = 0;
+  for (size_t j = 1; j < mergeParts.size(); ++j) {
+    if (mergeParts[j].empty()) continue;
+    if (mergeParts[i].empty() ||
+	isLessByGenome(mergeParts[j].back(), mergeParts[i].back()))
+      i = j;
+  }
+  if (i) {
+    mergeParts[0].swap(mergeParts[i]);
+    std::swap(tempFiles[0], tempFiles[i]);
+  }
+}
+
+static void popAlignment(vector<vector<Alignment> > &mergeParts,
+			 vector<std::FILE *> &tempFiles,
+			 size_t partBytes) {
+  mergeParts[0].pop_back();
+  if (tempFiles.empty()) return;
+  if (mergeParts[0].empty()) {
+    loadAlignments(mergeParts[0], tempFiles[0], partBytes);
+  }
+  putMinPartFirst(mergeParts, tempFiles);
 }
 
 void lastGenotype(const LastGenotypeArguments &args) {
@@ -738,10 +825,24 @@ void lastGenotype(const LastGenotypeArguments &args) {
 
   vector<Alignment> alignments;
   vector<std::string> refSeqNames;
-  readAlignmentFiles(args, alignments, refSeqNames);
+  vector<std::FILE *> tempFiles;
+  readAlignmentFiles(args, alignments, refSeqNames, tempFiles);
+
+  vector<vector<Alignment> > mergeParts(1);
+  size_t partBytes = 0;
+  if (tempFiles.empty()) {
+    reverse(alignments.begin(), alignments.end());
+    mergeParts[0].swap(alignments);
+  } else {
+    partBytes = args.buffer_size / tempFiles.size();
+    mergeParts.resize(tempFiles.size());
+    for (size_t i = 0; i < tempFiles.size(); ++i) {
+      loadAlignments(mergeParts[i], tempFiles[i], partBytes);
+    }
+    putMinPartFirst(mergeParts, tempFiles);
+  }
 
   size_t numOfTestedSites = 0;
-  size_t alignmentPos = 0;
   size_t refSeqNum = 0;
   size_t coord = 0;
   unsigned ploidy = 0;  // shut the compiler up
@@ -760,8 +861,8 @@ void lastGenotype(const LastGenotypeArguments &args) {
 
   while (true) {
     if (alignmentsHere.empty()) {
-      if (alignmentPos == alignments.size()) break;
-      const Alignment &a = alignments[alignmentPos];
+      if (mergeParts[0].empty()) break;
+      const Alignment &a = mergeParts[0].back();
       refSeqNum = a.refSeqNum;
       coord = a.beg;
       ploidy = ploidyOfChromosome(ploidies, refSeqNames[refSeqNum].c_str());
@@ -771,11 +872,11 @@ void lastGenotype(const LastGenotypeArguments &args) {
       newGenotype.resize(ploidy);
       genotypeString.assign(ploidy + 1, 0);
     }
-    while (alignmentPos < alignments.size()) {
-      const Alignment &a = alignments[alignmentPos];
+    while (!mergeParts[0].empty()) {
+      const Alignment &a = mergeParts[0].back();
       if (a.refSeqNum > refSeqNum || a.beg > coord) break;
       alignmentsHere.push_back(a);
-      ++alignmentPos;
+      popAlignment(mergeParts, tempFiles, partBytes);
     }
     while (true) {  // xxx bogus loop: what's the right way to do this?
       unsigned refBase = columnFromAlignment(alignmentsHere[0], coord)[0] / 16;
