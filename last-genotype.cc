@@ -370,9 +370,9 @@ static bool isBadQuery(const LastGenotypeArguments &args,
   return false;
 }
 
-static void discardBadAlignments(const LastGenotypeArguments &args,
-				 vector<Alignment> &alignments,
-				 size_t &queryStart, size_t &queryCount) {
+static void doOneQuery(const LastGenotypeArguments &args,
+		       vector<Alignment> &alignments,
+		       size_t &queryStart, size_t &queryCount) {
   size_t s = alignments.size();
   if (queryStart >= s) return;
   const Alignment *a = &alignments[0];
@@ -380,7 +380,10 @@ static void discardBadAlignments(const LastGenotypeArguments &args,
     queryStart = s;
     ++queryCount;
   } else {
-    while (s > queryStart) delete[] alignments[--s].columns;
+    while (s > queryStart) {
+      --s;
+      delete[] alignments[s].columns;
+    }
     alignments.resize(s);
   }
 }
@@ -472,7 +475,7 @@ static void readMaf(const LastGenotypeArguments &args,
 	parseTopSeq(sLines[0], rName, rBeg, rSeq);
 	parseBotSeq(sLines[1], qName, strand, qSeq);
 	if (qName != qNameOld) {
-	  discardBadAlignments(args, alignments, queryStart, queryCount);
+	  doOneQuery(args, alignments, queryStart, queryCount);
 	  isBad = isBadQuery(args, aLine);
 	}
 	if (!isBad) {
@@ -489,7 +492,7 @@ static void readMaf(const LastGenotypeArguments &args,
     }
   } while (in);
 
-  discardBadAlignments(args, alignments, queryStart, queryCount);
+  doOneQuery(args, alignments, queryStart, queryCount);
 }
 
 static void readAlignmentFiles(const LastGenotypeArguments &args,
@@ -698,9 +701,11 @@ static void decodeGenotype(unsigned ploidy, const uchar *in, char *out) {
 void discardOldAlignments(vector<Alignment> &alignments, size_t coord) {
   size_t n = alignments.size();
   size_t j = 0;
-  for (size_t i = 0; i < n; ++i)
-    if (alignments[i].end > coord)
+  for (size_t i = 0; i < n; ++i) {
+    if (alignments[i].end > coord) {
       alignments[j++] = alignments[i];
+    }
+  }
   alignments.resize(j);
 }
 
