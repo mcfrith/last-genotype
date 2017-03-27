@@ -451,6 +451,7 @@ static void dumpAlignments(const LastGenotypeArguments &args,
 			   vector<FILE *> &tempFiles,
 			   size_t &bytes,
 			   size_t numOfAlignments) {
+  if (args.verbose) std::cerr << "writing temporary file... ";
   FILE *f = tmpFile(args.temporary_directory);
   tempFiles.push_back(f);
   for (size_t i = 0; i < numOfAlignments; ++i) {
@@ -463,6 +464,7 @@ static void dumpAlignments(const LastGenotypeArguments &args,
   }
   if (fseek(f, 0, SEEK_SET) != 0) err("fseek temporary file failed");
   alignments.erase(alignments.begin(), alignments.begin() + numOfAlignments);
+  if (args.verbose) std::cerr << "done\n";
 }
 
 static void readMaf(const LastGenotypeArguments &args,

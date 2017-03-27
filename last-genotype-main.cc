@@ -52,6 +52,7 @@ static void run(int argc, char **argv) {
   args.splice = -1;
   args.buffer_size = defaultBufferSize();
   args.temporary_directory = 0;
+  args.verbose = 0;
 
   std::ostringstream help;
   help << "\
@@ -72,10 +73,11 @@ Options:\n\
   -S SIZE, --buffer-size=SIZE        memory limit (default="
        << (args.buffer_size / 1024 / 1024 / 1024) << "G)\n\
   -T DIR, --temporary-directory=DIR  put temporary files in DIR\n\
+  -v, --verbose         show progress messages\n\
   -V, --version         show version number and exit\n\
 ";
 
-  const char sOpts[] = "hm:p:f:s:S:T:V";
+  const char sOpts[] = "hm:p:f:s:S:T:vV";
 
   static struct option lOpts[] = {
     { "help",                no_argument,       0, 'h' },
@@ -85,6 +87,7 @@ Options:\n\
     { "splice",              required_argument, 0, 's' },
     { "buffer-size",         required_argument, 0, 'S' },
     { "temporary-directory", required_argument, 0, 'T' },
+    { "verbose",             no_argument,       0, 'v' },
     { "version",             no_argument,       0, 'V' },
     { 0, 0, 0, 0}
   };
@@ -112,6 +115,9 @@ Options:\n\
       break;
     case 'T':
       args.temporary_directory = optarg;
+      break;
+    case 'v':
+      args.verbose++;
       break;
     case 'V':
       std::cout << "last-genotype "

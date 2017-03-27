@@ -11,6 +11,7 @@ struct LastGenotypeArguments {
   double splice;
   size_t buffer_size;
   const char *temporary_directory;
+  int verbose;
   const char *lastTrainFile;
   char **mafFiles;
 };

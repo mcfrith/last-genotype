@@ -14,6 +14,7 @@ Options:
                         and a splice >= BP
   -S SIZE, --buffer-size=SIZE        memory limit (default=16G)
   -T DIR, --temporary-directory=DIR  put temporary files in DIR
+  -v, --verbose         show progress messages
 
 TEST last-genotype hs-rna.mat hs-rna.maf
 # last-genotype hs-rna.mat hs-rna.maf
