@@ -35,7 +35,7 @@ struct Alignment {
   unsigned beg;
   unsigned end;
   unsigned querySeqNum;  // xxx size_t ?
-  const uchar *columns;
+  uchar *columns;
 };
 
 struct AlignedBase {
@@ -393,13 +393,13 @@ static void checkSequenceLength(StringView sequence, size_t length) {
   if (sequence.size() != length) err("unequal MAF block lengths");
 }
 
-static const uchar *alignmentColumns(uchar seqCodeTables[][numOfChars],
-				     size_t rLen,
-				     StringView strand,
-				     StringView rSeq,
-				     StringView qSeq,
-				     const StringView *probSeqs,
-				     unsigned pLineCount) {
+static uchar *alignmentColumns(uchar seqCodeTables[][numOfChars],
+			       size_t rLen,
+			       StringView strand,
+			       StringView rSeq,
+			       StringView qSeq,
+			       const StringView *probSeqs,
+			       unsigned pLineCount) {
   size_t n = rSeq.size();
   checkSequenceLength(qSeq, n);
   if (pLineCount > 0) checkSequenceLength(probSeqs[0], n);
@@ -421,7 +421,7 @@ static const uchar *alignmentColumns(uchar seqCodeTables[][numOfChars],
 
 static void addAlignment(vector<Alignment> &alignments,
 			 size_t refSeqNum, unsigned beg, unsigned len,
-			 size_t querySeqNum, const uchar *columns) {
+			 size_t querySeqNum, uchar *columns) {
   Alignment a;
   a.refSeqNum = refSeqNum;
   a.beg = beg;
@@ -478,9 +478,9 @@ static void readMaf(const LastGenotypeArguments &args,
 	if (!isBad) {
 	  size_t refSeqNum = stringIndex(refSeqNames, rName);
 	  size_t rLen = alignmentSpan(rSeq);
-	  const uchar *c = alignmentColumns(seqCodeTables, rLen, strand,
+	  uchar *columns = alignmentColumns(seqCodeTables, rLen, strand,
 					    rSeq, qSeq, probSeqs, pLineCount);
-	  addAlignment(alignments, refSeqNum, rBeg, rLen, queryCount, c);
+	  addAlignment(alignments, refSeqNum, rBeg, rLen, queryCount, columns);
 	}
 	sLines = sLineBuf + (sLines - sLineBuf + 2) % 4;
 	qNameOld = qName;
