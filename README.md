@@ -28,16 +28,23 @@ In any case, you should get a file with substitution rates
 (e.g. `myseq.par`), and a file of alignments (e.g. `myseq.maf`).
 Now, run `last-genotype` like this:
 
-    last-genotype myseq.par myseq.maf > out.txt
+    last-genotype -b1 myseq.par myseq.maf > out.txt
+
+The `-b1` option tells it to require substitution evidence from both
+strands.  (Omit this if e.g. your reads are from RNA forward strands
+only.)
+
+You can also pipe in the alignments, for example:
+
+    zcat myseq.maf.gz | last-genotype -b1 myseq.par > out.txt
 
 ## Output format
 
-The output is a table with 10 tab-delimited columns, like this:
+The output is a table with 12 tab-delimited columns, like this:
 
-    chr20   1118650   T   CC   9.4   1.5   CT   0    0   C~ C~ cq c~ c~
-    chr20   3213195   C   AC   8.7   5.6   AT   0    0   A~ A~ C~ C~ a~ a~ c~
-    chr20   3223437   G   AG   6.8   3.2   AA   13   7   A~ A~ G~ G~ a~ a~ a~ g~
-    chr20   4024081   A   GG   12    2.1   AG   0    0   G! G# G3 GG g+ g. gG gM g~
+    chr20   1118650   T   CC   9.4   -0.15   CT   1.5   -0.2   0    0   C~ C~ cq c~ c~
+    chr20   3213195   C   AC   8.7   -0.05   AT   5.6   0.37   0    0   A~ A~ C~ C~ a~ a~ c~
+    chr20   3223437   G   AG   6.8   -0.31   AA   3.2   0.51   13   7   A~ A~ G~ G~ a~ a~ a~ g~
 
 * Column 1: chromosome name.
 
@@ -53,12 +60,24 @@ The output is a table with 10 tab-delimited columns, like this:
 * Column 5: log10[ likelihood(predicted genotype) /
   likelihood(homozygous reference) ].
 
-* Column 6: log10[ likelihood(predicted genotype) /
-  likelihood(2nd most likely genotype) ].
+* Column 6: strand bias, defined as (F - R) / (F + R), where:  
+  F = L(from forward-strand alignments only)  
+  R = L(from reverse-strand alignments only)  
+  L = log10[ likelihood(predicted genotype) / likelihood(homozygous reference) ].  
+  Note: F + R = column 5.
 
 * Column 7: the 2nd most likely genotype.
 
-Columns 8 and 9 provide extra information for heterozygous sites
+* Column 8: log10[ likelihood(predicted genotype) /
+  likelihood(2nd most likely genotype) ].
+
+* Column 9: strand bias, defined as (F2 - R2) / (F2 + R2), where:  
+  F2 = L2(from forward-strand alignments only)  
+  R2 = L2(from reverse-strand alignments only)  
+  L2 = log10[ likelihood(predicted genotype) / likelihood(2nd most likely genotype) ].  
+  Note: F2 + R2 = column 8.
+
+Columns 10 and 11 provide extra information for heterozygous sites
 (i.e. where the maternal and paternal bases are predicted to differ).
 For homozygous sites, they are always 0.  These columns refer to the
 *phase* of this site relative to the closest preceding heterozygous
@@ -66,11 +85,12 @@ site.  In the above example, the `A` at 3213195 is predicted to lie on
 the same (maternal or paternal) chromosome as the `A` at 3223437, with
 the `C` at 3213195 and `G` at 3223437 on the other chromosome.
 
-* Column 8: log10[ likelihood(predicted phase) / likelihood(the other phase) ].
+* Column 10: log10[ likelihood(predicted phase) / likelihood(the other
+  phase) ].
 
-* Column 9: number of reads with aligned bases at both sites.
+* Column 11: number of reads with aligned bases at both sites.
 
-* Column 10: the observed bases at this site, with symbols indicating
+* Column 12: the observed bases at this site, with symbols indicating
   their alignment reliability.  Each base is followed by either one
   symbol (if `-j4` was not used), or two (if `-j4` was used).  The
   first symbol, if present, comes from `-j4` and is described
@@ -120,6 +140,9 @@ files, but you can measure disk usage with a command such as `df -h`.
 
 - `-m INC`, `--min=INC`: minimum increase in log10(likelihood) over
   homozygous reference (default=6).
+
+- `-b INC`, `--bias=INC`: require that the column-6 strand bias has
+  magnitude < BIAS.
 
 - `-p N`, `--ploidy=N`: 1=haploid, 2=diploid, etc
   (default=`'2,chrY*:1,chrM*:1'`).
@@ -192,3 +215,5 @@ You can specify chromosome names using these symbols:
 
 * It doesn't allow varying ploidy *within* a chromosome
   (e.g. pseudo-autosomal regions).
+
+* It can't combine datasets with different substitution rates.

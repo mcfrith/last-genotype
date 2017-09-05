@@ -4,6 +4,7 @@
 
 #include <getopt.h>
 
+#include <cfloat>
 #include <cstdlib>  // EXIT_SUCCESS, EXIT_FAILURE
 #include <cstring>
 #include <iostream>
@@ -47,6 +48,7 @@ static void run(int argc, char **argv) {
   LastGenotypeArguments args;
   args.argv = argv;
   args.min = 6;
+  args.bias = DBL_MAX;
   args.ploidy.push_back("2,chrY*:1,chrM*:1");
   args.furthest = -1;
   args.splice = -1;
@@ -62,6 +64,7 @@ Find nucleotide substitutions relative to a reference genome.\n\
 \n\
 Options:\n\
   -h, --help            show this help message and exit\n\
+  -b BIAS, --bias=BIAS  require that the strand bias has magnitude < BIAS\n\
   -m INC, --min=INC     minimum increase in log10(likelihood) over homozygous\n\
                         reference (default=" << args.min << ")\n\
   -p N, --ploidy=N      1=haploid, 2=diploid, etc (default='"
@@ -77,11 +80,12 @@ Options:\n\
   -V, --version         show version number and exit\n\
 ";
 
-  const char sOpts[] = "hm:p:f:s:S:T:vV";
+  const char sOpts[] = "hm:b:p:f:s:S:T:vV";
 
   static struct option lOpts[] = {
     { "help",                no_argument,       0, 'h' },
     { "min",                 required_argument, 0, 'm' },
+    { "bias",                required_argument, 0, 'b' },
     { "ploidy",              required_argument, 0, 'p' },
     { "furthest",            required_argument, 0, 'f' },
     { "splice",              required_argument, 0, 's' },
@@ -100,6 +104,9 @@ Options:\n\
       return;
     case 'm':
       args.min = doubleFromString(optarg);
+      break;
+    case 'b':
+      args.bias = doubleFromString(optarg);
       break;
     case 'p':
       args.ploidy.push_back(optarg);

@@ -651,6 +651,23 @@ static void calcLogProbs(const double *genotypeCalcMatrix,
   }
 }
 
+static double strandLogProb(const double *genotypeCalcMatrix,
+			    size_t numOfBases,
+			    const uchar *colBases,
+			    const double *colProbs,
+			    unsigned strandNum,
+			    size_t genotypeIndex) {
+  const double *g = &genotypeCalcMatrix[alphLen2 * genotypeIndex];
+  double logProb = 0;
+  for (size_t j = 0; j < numOfBases; ++j) {
+    uchar queryBase = colBases[j];
+    if (queryBase % 2 == strandNum) {
+      logProb += myLog(colProbs[j] * g[queryBase] + 1);
+    }
+  }
+  return logProb;
+}
+
 static double twoSiteLogProb(size_t numOfPairedBases,
 			     const uchar *pairBases, const double *pairProbs,
 			     const double *rowA1, const double *rowA2,
@@ -901,6 +918,27 @@ void lastGenotype(const LastGenotypeArguments &args) {
       double logProbInc2nd = logProb1 - logProb2;
       std::memcpy(&newGenotype[0], &genotypes[max1 * ploidy], ploidy);
       const uchar *genotype2nd = &genotypes[max2 * ploidy];
+
+      const double *gcm = &genotypeCalcMatrix[0];
+      double logProb1stFwd = strandLogProb(gcm, numOfBases, &colBases[0],
+					   &colProbs[0], 0, max1);
+
+      double logProbRefFwd = strandLogProb(gcm, numOfBases, &colBases[0],
+					   &colProbs[0], 0, refGenotypeIndex);
+      double logProbIncRefFwd = logProb1stFwd - logProbRefFwd;
+      double logProbIncRefRev = logProbIncRef - logProbIncRefFwd;
+      double strandBiasRef =
+	(logProbIncRefFwd - logProbIncRefRev) / logProbIncRef;
+
+      if (fabs(strandBiasRef) >= args.bias) break;
+
+      double logProb2ndFwd = strandLogProb(gcm, numOfBases, &colBases[0],
+					   &colProbs[0], 0, max2);
+      double logProbInc2ndFwd = logProb1stFwd - logProb2ndFwd;
+      double logProbInc2ndRev = logProbInc2nd - logProbInc2ndFwd;
+      double strandBias2nd =
+	(logProbInc2ndFwd - logProbInc2ndRev) / logProbInc2nd;
+
       double logProbIncPhase = 0;
       size_t phaseCoverage = 0;
       if (ploidy == 2 && newGenotype[0] != newGenotype[1]) {
@@ -927,10 +965,12 @@ void lastGenotype(const LastGenotypeArguments &args) {
       decodeGenotype(ploidy, &newGenotype[0], &genotypeString[0]);
       std::cout << &genotypeString[0] << '\t'
 		<< (logProbIncRef / myLog(10)) << '\t'
-		<< (logProbInc2nd / myLog(10)) << '\t';
+		<< strandBiasRef << '\t';
       decodeGenotype(ploidy, genotype2nd, &genotypeString[0]);
       std::cout << &genotypeString[0] << '\t'
-		<< (logProbIncPhase / myLog(10)) << '\t'
+		<< (logProbInc2nd / myLog(10)) << '\t'
+		<< strandBias2nd << '\t';
+      std::cout << (logProbIncPhase / myLog(10)) << '\t'
 		<< phaseCoverage << '\t';
       for (size_t i = 0; i < numOfBases; ++i) {
 	if (i) std::cout << ' ';
