@@ -38,6 +38,8 @@ struct Alignment {
   unsigned beg;
   unsigned end;
   unsigned querySeqNum;  // xxx size_t ?
+  unsigned queryBeg;
+  unsigned queryEnd;
   uchar *columns;
 };
 
@@ -354,12 +356,18 @@ static size_t alignmentSpan(StringView sequence) {
 static void parseBodyLine(const std::string &sLine, StringView &seqName,
 			  unsigned &beg, unsigned &end, StringView &strand,
 			  StringView &seq) {
+  unsigned seqLen;
   StringView s(sLine);
-  s >> seq >> seqName >> beg >> seq >> strand >> seq >> seq;
+  s >> seq >> seqName >> beg >> seq >> strand >> seqLen >> seq;
   if (!s) err("bad MAF line: " + sLine);
   size_t len = alignmentSpan(seq);
   end = beg + len;
   if (end < len) err("bad MAF line: " + sLine);  // overflow
+  if (strand[0] == '-') {
+    if (seqLen < end) err("bad MAF line: " + sLine);
+    beg = seqLen - end;
+    end = beg + len;
+  }
 }
 
 static void parseProbLine(const std::string &pLine, StringView &probSeq) {
@@ -510,9 +518,10 @@ static void readMaf(const LastGenotypeArguments &args,
 	  }
 	  uchar *columns = alignmentColumns(seqCodeTables, colBytes, strand,
 					    rSeq, qSeq, probSeqs, pLineCount);
-	  Alignment a = {refSeqNum, rBeg, rEnd, queryCount, columns};
+	  size_t qSeqNum = queryCount;
+	  Alignment a = {refSeqNum, rBeg, rEnd, qSeqNum, qBeg, qEnd, columns};
 	  if (a.refSeqNum < refSeqNum) err("too many reference sequences");
-	  if (a.querySeqNum < queryCount) err("too many query sequences");
+	  if (a.querySeqNum < qSeqNum) err("too many query sequences");
 	  alignments.push_back(a);
 	}
 	sLines = sLineBuf + (sLines - sLineBuf + 2) % 4;
