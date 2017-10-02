@@ -4,6 +4,7 @@
 
 #include "mcf_string_view.hh"
 #include "mcf_tmpfile.hh"
+#include "mcf_zstream.hh"
 
 #include <fnmatch.h>
 
@@ -97,7 +98,7 @@ static StringView &munch(StringView &in, const char *text) {
   return in = StringView(b, e);
 }
 
-static std::istream &openIn(const char *fileName, std::ifstream &ifs) {
+static std::istream &openIn(const char *fileName, mcf::izstream &ifs) {
   if (isChar(fileName, '-')) return std::cin;
   ifs.open(fileName);
   if (!ifs) err("can't open file: " + std::string(fileName));
@@ -204,7 +205,7 @@ static void makeGenotypeCalc(double baseCalcMatrix[][alphLen2],
 
 static void alignmentProbMatrixFromLastTrain(const char *fileName,
 					     double matrix[][alphLen]) {
-  std::ifstream ifs;
+  mcf::izstream ifs;
   std::istream &in = openIn(fileName, ifs);
 
   unsigned rowNum = alphLen + 1;
@@ -535,7 +536,7 @@ static void readAlignmentFiles(const LastGenotypeArguments &args,
 
   if (*args.mafFiles) {
     for (char **i = args.mafFiles; *i; ++i) {
-      std::ifstream ifs;
+      mcf::izstream ifs;
       std::istream &in = openIn(*i, ifs);
       readMaf(args, alignments, refSeqNames, tempFiles, queryCount, bytes, in);
     }

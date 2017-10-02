@@ -2,10 +2,11 @@ CXXFLAGS = -O3 -Wall -g
 
 SRC = last-genotype.cc last-genotype-main.cc
 
-INC = last-genotype.hh mcf_string_view.hh mcf_tmpfile.hh version.hh
+INC = last-genotype.hh mcf_string_view.hh mcf_tmpfile.hh	\
+mcf_zstream.hh version.hh
 
 last-genotype: ${SRC} ${INC}
-	${CXX} ${CXXFLAGS} -o $@ ${SRC}
+	${CXX} ${CXXFLAGS} -o $@ ${SRC} -lz
 
 VERSION = \"`git log --oneline | grep -c .``git diff --quiet HEAD || echo +`\"
 UNKNOWN = \"UNKNOWN\"

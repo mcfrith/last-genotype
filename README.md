@@ -34,9 +34,10 @@ The `-b1` option tells it to require substitution evidence from both
 strands.  (Omit this if e.g. your reads are from RNA forward strands
 only.)
 
-You can also pipe in the alignments, for example:
+The input files may be compressed in gzip (.gz) format. You can also
+pipe in the alignments, for example:
 
-    zcat myseq.maf.gz | last-genotype -b1 myseq.par > out.txt
+    bzcat myseq.maf.bz2 | last-genotype -b1 myseq.par > out.txt
 
 ## Output format
 
