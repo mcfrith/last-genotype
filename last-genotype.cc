@@ -488,8 +488,9 @@ static void readMaf(const LastGenotypeArguments &args,
   std::string line;
   StringView rName, qName, qNameOld, strand, rSeq, qSeq, probSeqs[2];
 
-  do {
+  do {  // unusual getline loop: simulate extra final blank line
     getline(in, line);
+    if (!in) line.clear();  // careful: final char may not be newline
     const char *s = line.c_str();
     if (*s == 'a') {
       line.swap(aLine);
