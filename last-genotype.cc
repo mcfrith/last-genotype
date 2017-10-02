@@ -352,11 +352,14 @@ static size_t alignmentSpan(StringView sequence) {
 }
 
 static void parseBodyLine(const std::string &sLine, StringView &seqName,
-			  unsigned &start, StringView &strand,
+			  unsigned &beg, unsigned &end, StringView &strand,
 			  StringView &seq) {
   StringView s(sLine);
-  s >> seq >> seqName >> start >> seq >> strand >> seq >> seq;
+  s >> seq >> seqName >> beg >> seq >> strand >> seq >> seq;
   if (!s) err("bad MAF line: " + sLine);
+  size_t len = alignmentSpan(seq);
+  end = beg + len;
+  if (end < len) err("bad MAF line: " + sLine);  // overflow
 }
 
 static void parseProbLine(const std::string &pLine, StringView &probSeq) {
@@ -487,18 +490,17 @@ static void readMaf(const LastGenotypeArguments &args,
       ++pLineCount;
     } else if (!isGraph(*s)) {
       if (sLineCount > 1) {
-	unsigned rBeg, qBeg;
-	parseBodyLine(sLines[0], rName, rBeg, strand, rSeq);
+	unsigned rBeg, rEnd, qBeg, qEnd;
+	parseBodyLine(sLines[0], rName, rBeg, rEnd, strand, rSeq);
 	if (strand[0] == '-') err("top MAF strand must be +");
-	parseBodyLine(sLines[1], qName, qBeg, strand, qSeq);
+	parseBodyLine(sLines[1], qName, qBeg, qEnd, strand, qSeq);
 	if (qName != qNameOld) {
 	  doOneQuery(args, alignments, queryStart, queryCount, bytes);
 	  isBad = isBadQuery(args, aLine);
 	}
 	if (!isBad) {
 	  size_t refSeqNum = stringIndex(refSeqNames, rName);
-	  size_t rLen = alignmentSpan(rSeq);
-	  size_t colBytes = rLen * bytesPerAlignmentColumn;
+	  size_t colBytes = (rEnd - rBeg) * bytesPerAlignmentColumn;
 	  bytes += colBytes + sizeof(Alignment);
 	  if (bytes > args.buffer_size && queryStart > 0) {
 	    sort(alignments.begin(),
@@ -508,7 +510,7 @@ static void readMaf(const LastGenotypeArguments &args,
 	  }
 	  uchar *columns = alignmentColumns(seqCodeTables, colBytes, strand,
 					    rSeq, qSeq, probSeqs, pLineCount);
-	  Alignment a = {refSeqNum, rBeg, rBeg + rLen, queryCount, columns};
+	  Alignment a = {refSeqNum, rBeg, rEnd, queryCount, columns};
 	  if (a.refSeqNum < refSeqNum) err("too many reference sequences");
 	  if (a.querySeqNum < queryCount) err("too many query sequences");
 	  alignments.push_back(a);
