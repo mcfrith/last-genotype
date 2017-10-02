@@ -388,13 +388,14 @@ static bool isBadQuery(const LastGenotypeArguments &args,
 
 static void doOneQuery(const LastGenotypeArguments &args,
 		       vector<Alignment> &alignments,
-		       size_t &queryStart, size_t &queryCount, size_t &bytes) {
+		       vector<std::string> &querySeqNames, StringView qName,
+		       size_t &queryStart, size_t &bytes) {
   size_t s = alignments.size();
   if (queryStart >= s) return;
   const Alignment *a = &alignments[0];
   if (isGoodAlignments(args, a + queryStart, a + s)) {
     queryStart = s;
-    ++queryCount;
+    querySeqNames.push_back(std::string(qName.begin(), qName.size()));
   } else {
     while (s > queryStart) {
       const Alignment &a = alignments[--s];
@@ -463,8 +464,8 @@ static void dumpAlignments(const LastGenotypeArguments &args,
 static void readMaf(const LastGenotypeArguments &args,
 		    vector<Alignment> &alignments,
 		    vector<std::string> &refSeqNames,
+		    vector<std::string> &querySeqNames,
 		    vector<FILE *> &tempFiles,
-		    size_t &queryCount,
 		    size_t &bytes,
 		    std::istream &in) {
   uchar seqCodeTables[3][numOfChars];
@@ -503,7 +504,8 @@ static void readMaf(const LastGenotypeArguments &args,
 	if (strand[0] == '-') err("top MAF strand must be +");
 	parseBodyLine(sLines[1], qName, qBeg, qEnd, strand, qSeq);
 	if (qName != qNameOld) {
-	  doOneQuery(args, alignments, queryStart, queryCount, bytes);
+	  doOneQuery(args, alignments, querySeqNames, qNameOld, queryStart,
+		     bytes);
 	  isBad = isBadQuery(args, aLine);
 	}
 	if (!isBad) {
@@ -518,7 +520,7 @@ static void readMaf(const LastGenotypeArguments &args,
 	  }
 	  uchar *columns = alignmentColumns(seqCodeTables, colBytes, strand,
 					    rSeq, qSeq, probSeqs, pLineCount);
-	  size_t qSeqNum = queryCount;
+	  size_t qSeqNum = querySeqNames.size();
 	  Alignment a = {refSeqNum, rBeg, rEnd, qSeqNum, qBeg, qEnd, columns};
 	  if (a.refSeqNum < refSeqNum) err("too many reference sequences");
 	  if (a.querySeqNum < qSeqNum) err("too many query sequences");
@@ -531,25 +533,26 @@ static void readMaf(const LastGenotypeArguments &args,
     }
   } while (in);
 
-  doOneQuery(args, alignments, queryStart, queryCount, bytes);
+  doOneQuery(args, alignments, querySeqNames, qNameOld, queryStart, bytes);
 }
 
 static void readAlignmentFiles(const LastGenotypeArguments &args,
 			       vector<Alignment> &alignments,
 			       vector<std::string> &refSeqNames,
+			       vector<std::string> &querySeqNames,
 			       vector<FILE *> &tempFiles) {
-  size_t queryCount = 0;
   size_t bytes = 0;
 
   if (*args.mafFiles) {
     for (char **i = args.mafFiles; *i; ++i) {
       mcf::izstream ifs;
       std::istream &in = openIn(*i, ifs);
-      readMaf(args, alignments, refSeqNames, tempFiles, queryCount, bytes, in);
+      readMaf(args, alignments, refSeqNames, querySeqNames, tempFiles,
+	      bytes, in);
     }
   } else {
-    readMaf(args, alignments, refSeqNames, tempFiles, queryCount, bytes,
-	    std::cin);
+    readMaf(args, alignments, refSeqNames, querySeqNames, tempFiles,
+	    bytes, std::cin);
   }
 
   sort(alignments.begin(), alignments.end(), isLessByGenome);
@@ -557,7 +560,7 @@ static void readAlignmentFiles(const LastGenotypeArguments &args,
     dumpAlignments(args, alignments, tempFiles, bytes, alignments.size());
   }
 
-  std::cout << "# Query sequences used: " << queryCount << '\n';
+  std::cout << "# Query sequences used: " << querySeqNames.size() << '\n';
 }
 
 static size_t preprocessColumns(const double *qualTable, size_t coord,
@@ -843,8 +846,9 @@ void lastGenotype(const LastGenotypeArguments &args) {
 
   vector<Alignment> alignments;
   vector<std::string> refSeqNames;
+  vector<std::string> querySeqNames;
   vector<std::FILE *> tempFiles;
-  readAlignmentFiles(args, alignments, refSeqNames, tempFiles);
+  readAlignmentFiles(args, alignments, refSeqNames, querySeqNames, tempFiles);
 
   vector<vector<Alignment> > mergeParts(1);
   size_t partBytes = 0;
