@@ -26,6 +26,7 @@ const size_t maxSize = -1;
 const size_t numOfChars = UCHAR_MAX + 1;
 const unsigned alphLen = 4;
 const unsigned alphLen2 = alphLen * 2;
+const size_t bytesPerAlignmentColumn = 3;
 
 struct PloidySpec {
   std::string seqNamePattern;
@@ -55,11 +56,11 @@ static unsigned alignmentStrandNum(const Alignment &a) {
 }
 
 static size_t bytesInColumns(const Alignment &a) {
-  return (a.end - a.beg) * 3;
+  return (a.end - a.beg) * bytesPerAlignmentColumn;
 }
 
 static const uchar *columnFromAlignment(const Alignment &a, size_t coord) {
-  return a.columns + (coord - a.beg) * 3;
+  return a.columns + (coord - a.beg) * bytesPerAlignmentColumn;
 }
 
 static size_t alignmentDistance(const Alignment &a, const Alignment &b) {
@@ -497,7 +498,7 @@ static void readMaf(const LastGenotypeArguments &args,
 	if (!isBad) {
 	  size_t refSeqNum = stringIndex(refSeqNames, rName);
 	  size_t rLen = alignmentSpan(rSeq);
-	  size_t colBytes = rLen * 3;
+	  size_t colBytes = rLen * bytesPerAlignmentColumn;
 	  bytes += colBytes + sizeof(Alignment);
 	  if (bytes > args.buffer_size && queryStart > 0) {
 	    sort(alignments.begin(),
