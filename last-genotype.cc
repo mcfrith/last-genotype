@@ -350,17 +350,11 @@ static size_t alignmentSpan(StringView sequence) {
   return sequence.size() - std::count(sequence.begin(), sequence.end(), '-');
 }
 
-static void parseTopSeq(const std::string &sLine, StringView &seqName,
-			unsigned &start, StringView &seq) {
+static void parseBodyLine(const std::string &sLine, StringView &seqName,
+			  unsigned &start, StringView &strand,
+			  StringView &seq) {
   StringView s(sLine);
-  s >> seq >> seqName >> start >> seq >> seq >> seq >> seq;
-  if (!s) err("bad MAF line: " + sLine);
-}
-
-static void parseBotSeq(const std::string &sLine, StringView &seqName,
-			StringView &strand, StringView &seq) {
-  StringView s(sLine);
-  s >> seq >> seqName >> seq >> seq >> strand >> seq >> seq;
+  s >> seq >> seqName >> start >> seq >> strand >> seq >> seq;
   if (!s) err("bad MAF line: " + sLine);
 }
 
@@ -492,9 +486,10 @@ static void readMaf(const LastGenotypeArguments &args,
       ++pLineCount;
     } else if (!isGraph(*s)) {
       if (sLineCount > 1) {
-	unsigned rBeg;
-	parseTopSeq(sLines[0], rName, rBeg, rSeq);
-	parseBotSeq(sLines[1], qName, strand, qSeq);
+	unsigned rBeg, qBeg;
+	parseBodyLine(sLines[0], rName, rBeg, strand, rSeq);
+	if (strand[0] == '-') err("top MAF strand must be +");
+	parseBodyLine(sLines[1], qName, qBeg, strand, qSeq);
 	if (qName != qNameOld) {
 	  doOneQuery(args, alignments, queryStart, queryCount, bytes);
 	  isBad = isBadQuery(args, aLine);
