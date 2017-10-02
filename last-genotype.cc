@@ -345,6 +345,10 @@ static void parseHeadLine(const std::string &aLine, double &sense) {
   err("missing sense=");
 }
 
+static size_t alignmentSpan(StringView sequence) {
+  return sequence.size() - std::count(sequence.begin(), sequence.end(), '-');
+}
+
 static void parseTopSeq(const std::string &sLine, StringView &seqName,
 			unsigned &start, StringView &seq) {
   StringView s(sLine);
@@ -394,10 +398,6 @@ static void doOneQuery(const LastGenotypeArguments &args,
   }
 }
 
-static size_t alignmentSpan(StringView sequence) {
-  return sequence.size() - std::count(sequence.begin(), sequence.end(), '-');
-}
-
 static void checkSequenceLength(StringView sequence, size_t length) {
   if (sequence.size() != length) err("unequal MAF block lengths");
 }
@@ -426,20 +426,6 @@ static uchar *alignmentColumns(uchar seqCodeTables[][numOfChars],
     *c++ = (pLineCount > 1) ? probSeqs[1][i] : 0;
   }
   return columns;
-}
-
-static void addAlignment(vector<Alignment> &alignments,
-			 size_t refSeqNum, unsigned beg, unsigned len,
-			 size_t querySeqNum, uchar *columns) {
-  Alignment a;
-  a.refSeqNum = refSeqNum;
-  a.beg = beg;
-  a.end = beg + len;
-  a.querySeqNum = querySeqNum;
-  a.columns = columns;
-  if (a.refSeqNum < refSeqNum) err("too many reference sequences");
-  if (a.querySeqNum < querySeqNum) err("too many query sequences");
-  alignments.push_back(a);
 }
 
 static void writeOrDie(const void *beg, size_t len, FILE *f) {
@@ -525,7 +511,10 @@ static void readMaf(const LastGenotypeArguments &args,
 	  }
 	  uchar *columns = alignmentColumns(seqCodeTables, colBytes, strand,
 					    rSeq, qSeq, probSeqs, pLineCount);
-	  addAlignment(alignments, refSeqNum, rBeg, rLen, queryCount, columns);
+	  Alignment a = {refSeqNum, rBeg, rBeg + rLen, queryCount, columns};
+	  if (a.refSeqNum < refSeqNum) err("too many reference sequences");
+	  if (a.querySeqNum < queryCount) err("too many query sequences");
+	  alignments.push_back(a);
 	}
 	sLines = sLineBuf + (sLines - sLineBuf + 2) % 4;
 	qNameOld = qName;
@@ -768,10 +757,11 @@ void discardOldAlignments(vector<Alignment> &alignments, size_t coord) {
   size_t n = alignments.size();
   size_t j = 0;
   for (size_t i = 0; i < n; ++i) {
-    if (alignments[i].end > coord) {
-      alignments[j++] = alignments[i];
+    const Alignment &a = alignments[i];
+    if (a.end > coord) {
+      alignments[j++] = a;
     } else {
-      delete[] alignments[i].columns;
+      delete[] a.columns;
     }
   }
   alignments.resize(j);
