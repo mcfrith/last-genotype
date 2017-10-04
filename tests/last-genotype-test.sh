@@ -21,6 +21,8 @@ PATH=..:$PATH
     try last-genotype -p'3,chr1*:1' hs-rna.mat hs-rna.maf
     try last-genotype -f1000 hs-rna.mat hs-rna.maf hs-rna.maf
     try last-genotype -v -S1M hs-rna.mat hs-rna.maf
+    try last-genotype -b1 hs-rna.mat hs-rna.maf
+    try last-genotype -b1 -c- hs-rna.mat hs-rna.maf
 } 2>&1 |
 grep -v version |
 diff -u $(basename $0 .sh).out -
