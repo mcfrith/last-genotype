@@ -920,7 +920,7 @@ void lastGenotype(const LastGenotypeArguments &args) {
   }
 
   size_t numOfTestedSites = 0;
-  size_t refSeqNum = 0;
+  size_t refSeqNum = -1;
   size_t coord = 0;
   unsigned ploidy = 0;  // shut the compiler up
   vector<uchar> genotypes;
@@ -945,15 +945,19 @@ void lastGenotype(const LastGenotypeArguments &args) {
     if (alignmentsHere.empty()) {
       if (mergeParts[0].empty()) break;
       const Alignment &a = mergeParts[0].back();
-      // XXX reset oldGenotype if new refSeqNum ???
-      refSeqNum = a.refSeqNum;
       coord = a.beg;
-      ploidy = ploidyOfChromosome(ploidies, refSeqNames[refSeqNum].c_str());
-      makeGenotypes(genotypes, ploidy);
-      makeGenotypeCalc(baseCalcMatrix, ploidy, genotypes, genotypeCalcMatrix);
-      genotypeLogProbs.resize(genotypes.size() / ploidy);
-      newGenotype.resize(ploidy);
-      genotypeString.assign(ploidy + 1, 0);
+      if (a.refSeqNum != refSeqNum) {
+	refSeqNum = a.refSeqNum;
+	ploidy = ploidyOfChromosome(ploidies, refSeqNames[refSeqNum].c_str());
+	makeGenotypes(genotypes, ploidy);
+	makeGenotypeCalc(baseCalcMatrix, ploidy, genotypes,
+			 genotypeCalcMatrix);
+	genotypeLogProbs.resize(genotypes.size() / ploidy);
+	newGenotype.resize(ploidy);
+	genotypeString.assign(ploidy + 1, 0);
+	oldAlignedBases.clear();
+	oldGenotype.clear();
+      }
     }
     while (!mergeParts[0].empty()) {
       const Alignment &a = mergeParts[0].back();
