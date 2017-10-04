@@ -154,6 +154,9 @@ files, but you can measure disk usage with a command such as `df -h`.
 - `-s BP`, `--splice=BP`: only use query sequences with strong splice
   signals and least one splice >= BP.
 
+- `-c FILE`, `--class-file=FILE`: write a classification of the query
+  sequences by maternal/paternal chromosome.
+
 - `-S SIZE`, `--buffer-size=SIZE`: maximum amount of memory to use
   (roughly).  E.g. `32G` means 32 GibiBytes.
 
@@ -192,6 +195,53 @@ You can specify chromosome names using these symbols:
     [abc]    any character in abc
     [!abc]   any character not in abc
 
+## Classifying the reads
+
+If you use the class-file option:
+
+    last-genotype -c classify.txt -b1 myseq.par myseq.maf > out.txt
+
+`last-genotype` will write a file showing which (maternal or paternal)
+chromosome each read is from.  This file has 10 tab-delimited columns:
+
+    readJ   799     1453    chr11   838132  838817  +       a       12      7
+    readK   40      119     chr11   838728  838817  +       b       0.89    1
+    readL   70      370     chr11   838491  838819  -       b       7.1     4
+
+Each line corresponds to one of the input alignments.  (So it is
+possible for one read to appear in more than one line, if it was split
+into more than one alignment.)  The first 3 columns show the aligned
+part of the read, in [BED3
+format](https://genome.ucsc.edu/FAQ/FAQformat.html#format1).  The next
+3 columns show the aligned part of the reference genome.  The 7th
+column indicates the DNA strand.
+
+The 8th column shows which (maternal or paternal) chromosome the read
+is from.  `a` means "left" and `b` means "right".  For example, given:
+
+    chr11   838721  T       TC      ...
+    chr11   838759  T       AT      ...
+
+`a` indicates the chromosome that has `T` at 838721 and `A` at 838759,
+whereas `b` indicates the chromosome that has `C` at 838721 and `T` at
+838759.
+
+The 9th column is: log10[ likelihood(predicted chromosome) /
+likelihood(the other chromosome) ].
+
+The 10th column shows the number of bases aligned to heterozygous
+sites.
+
+Cases with zero in column 9 or 10 are not written, because they cannot
+be classified.
+
+Blank lines are written at locations with unknown phasing (zero in
+column 10 of the main `last-genotype` output).  Thus, at each blank
+line, there is a 50/50 chance that `a` and `b` (i.e. left and right)
+switch to the opposite (maternal or paternal) chromosome.  In other
+words, the classification is meaningful only within each
+blank-line-separated block of lines.
+
 ## Limitations
 
 * It only finds substitutions (not deletions, insertions, inversions,
@@ -207,7 +257,8 @@ You can specify chromosome names using these symbols:
   cancer, where one site may have, say, 27% `A` and 73% `C`.  But it
   will often identify such sites as heterozygous, which may be useful.
 
-* Phasing is attempted only for diploid chromosomes.
+* Phasing (and classifying reads) is attempted only for diploid
+  chromosomes.
 
 * For RNA reads: it makes no attempt to distinguish between genomic
   substitutions and RNA editing.  Also, if there is allele-biased

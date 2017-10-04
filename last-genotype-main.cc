@@ -52,6 +52,7 @@ static void run(int argc, char **argv) {
   args.ploidy.push_back("2,chrY*:1,chrM*:1");
   args.furthest = -1;
   args.splice = -1;
+  args.class_file = 0;
   args.buffer_size = defaultBufferSize();
   args.temporary_directory = 0;
   args.verbose = 0;
@@ -73,6 +74,8 @@ Options:\n\
                         separated by <= BP\n\
   -s BP, --splice=BP    only use query sequences with strong splice signals\n\
                         and a splice >= BP\n\
+  -c FILE, --class-file=FILE         write classification of query sequences\n\
+                                     by maternal/paternal chromosome\n\
   -S SIZE, --buffer-size=SIZE        memory limit (default="
        << (args.buffer_size / 1024 / 1024 / 1024) << "G)\n\
   -T DIR, --temporary-directory=DIR  put temporary files in DIR\n\
@@ -80,7 +83,7 @@ Options:\n\
   -V, --version         show version number and exit\n\
 ";
 
-  const char sOpts[] = "hm:b:p:f:s:S:T:vV";
+  const char sOpts[] = "hm:b:p:f:s:c:S:T:vV";
 
   static struct option lOpts[] = {
     { "help",                no_argument,       0, 'h' },
@@ -89,6 +92,7 @@ Options:\n\
     { "ploidy",              required_argument, 0, 'p' },
     { "furthest",            required_argument, 0, 'f' },
     { "splice",              required_argument, 0, 's' },
+    { "class-file",          required_argument, 0, 'c' },
     { "buffer-size",         required_argument, 0, 'S' },
     { "temporary-directory", required_argument, 0, 'T' },
     { "verbose",             no_argument,       0, 'v' },
@@ -116,6 +120,9 @@ Options:\n\
       break;
     case 's':
       args.splice = doubleFromString(optarg);
+      break;
+    case 'c':
+      args.class_file = optarg;
       break;
     case 'S':
       args.buffer_size = sizeFromString(optarg);

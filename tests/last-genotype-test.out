@@ -13,6 +13,8 @@ Options:
                         separated by <= BP
   -s BP, --splice=BP    only use query sequences with strong splice signals
                         and a splice >= BP
+  -c FILE, --class-file=FILE         write classification of query sequences
+                                     by maternal/paternal chromosome
   -S SIZE, --buffer-size=SIZE        memory limit (default=16G)
   -T DIR, --temporary-directory=DIR  put temporary files in DIR
   -v, --verbose         show progress messages

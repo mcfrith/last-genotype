@@ -10,6 +10,7 @@ struct LastGenotypeArguments {
   std::vector<const char *> ploidy;
   double furthest;
   double splice;
+  const char *class_file;
   size_t buffer_size;
   const char *temporary_directory;
   int verbose;

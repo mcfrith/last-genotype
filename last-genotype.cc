@@ -43,6 +43,12 @@ struct Alignment {
   uchar *columns;
 };
 
+struct InPlayAlignment {
+  Alignment a;
+  unsigned numOfHeterozygousSites;
+  double alleleLogProbDif;
+};
+
 struct AlignedBase {
   unsigned querySeqNum;
   uchar queryBase;
@@ -61,8 +67,9 @@ static size_t bytesInColumns(const Alignment &a) {
   return (a.end - a.beg) * bytesPerAlignmentColumn;
 }
 
-static const uchar *columnFromAlignment(const Alignment &a, size_t coord) {
-  return a.columns + (coord - a.beg) * bytesPerAlignmentColumn;
+static const uchar *columnFromAlignment(const InPlayAlignment &x,
+					size_t coord) {
+  return x.a.columns + (coord - x.a.beg) * bytesPerAlignmentColumn;
 }
 
 static size_t alignmentDistance(const Alignment &a, const Alignment &b) {
@@ -106,6 +113,14 @@ static std::istream &openIn(const char *fileName, mcf::izstream &ifs) {
   ifs.open(fileName);
   if (!ifs) err("can't open file: " + std::string(fileName));
   return ifs;
+}
+
+static std::ostream &openOut(const char *fileName, std::ofstream &ofs) {
+  if (!fileName) return ofs;
+  if (isChar(fileName, '-')) return std::cout;
+  ofs.open(fileName);
+  if (!ofs) err("can't open file: " + std::string(fileName));
+  return ofs;
 }
 
 static double myLog(double x) {
@@ -395,7 +410,8 @@ static void doOneQuery(const LastGenotypeArguments &args,
   const Alignment *a = &alignments[0];
   if (isGoodAlignments(args, a + queryStart, a + s)) {
     queryStart = s;
-    querySeqNames.push_back(std::string(qName.begin(), qName.size()));
+    querySeqNames.push_back(args.class_file ?
+			    std::string(qName.begin(), qName.size()) : "");
   } else {
     while (s > queryStart) {
       const Alignment &a = alignments[--s];
@@ -564,7 +580,7 @@ static void readAlignmentFiles(const LastGenotypeArguments &args,
 }
 
 static size_t preprocessColumns(const double *qualTable, size_t coord,
-				const vector<Alignment> &alignments,
+				const vector<InPlayAlignment> &alignments,
 				vector<uchar> &colBases,
 				vector<double> &colProbs) {
   size_t n = alignments.size();
@@ -583,22 +599,43 @@ static size_t preprocessColumns(const double *qualTable, size_t coord,
 }
 
 static void getAlignedBases(const double *qualTable, size_t coord,
-			    const vector<Alignment> &alignments,
+			    const vector<InPlayAlignment> &alignments,
 			    vector<AlignedBase> &alignedBases) {
   size_t j = 0;
   for (size_t i = 0; i < alignments.size(); ++i) {
     const uchar *c = columnFromAlignment(alignments[i], coord);
     uchar queryBase = c[0] % 16;
     if (queryBase >= alphLen2) continue;
-    alignedBases[j].querySeqNum = alignments[i].querySeqNum;
+    alignedBases[j].querySeqNum = alignments[i].a.querySeqNum;
     alignedBases[j].queryBase = queryBase;
     alignedBases[j].prob = qualTable[c[1]] * qualTable[c[2]];
     ++j;
   }
 }
 
+static void calcAlleleProbsPerAlignment(const double *qualTable,
+					double baseCalcMatrix[][alphLen2],
+					size_t coord,
+					vector<InPlayAlignment> &alignments,
+					const uchar *genotype) {
+  const double *rowA = baseCalcMatrix[genotype[0]];
+  const double *rowB = baseCalcMatrix[genotype[1]];
+
+  for (size_t i = 0; i < alignments.size(); ++i) {
+    const uchar *c = columnFromAlignment(alignments[i], coord);
+    uchar queryBase = c[0] % 16;
+    if (queryBase >= alphLen2) continue;
+    ++alignments[i].numOfHeterozygousSites;
+
+    double colProb = qualTable[c[1]] * qualTable[c[2]];
+    double a = colProb * rowA[queryBase] + 1;
+    double b = colProb * rowB[queryBase] + 1;
+    alignments[i].alleleLogProbDif += myLog(a / b);
+  }
+}
+
 static void makeAlignedBaseTexts(size_t coord,
-				 const vector<Alignment> &alignments,
+				 const vector<InPlayAlignment> &alignments,
 				 vector<AlignedBaseText> &alignedBaseTexts) {
   size_t j = 0;
   for (size_t i = 0; i < alignments.size(); ++i) {
@@ -764,14 +801,32 @@ static void decodeGenotype(unsigned ploidy, const uchar *in, char *out) {
   }
 }
 
-void discardOldAlignments(vector<Alignment> &alignments, size_t coord) {
+static void discardOldAlignments(const LastGenotypeArguments &args,
+				 vector<InPlayAlignment> &alignments,
+				 size_t coord,
+				 const vector<std::string> &refSeqNames,
+				 const vector<std::string> &querySeqNames,
+				 std::ostream &classOutput, int &classState) {
   size_t n = alignments.size();
   size_t j = 0;
   for (size_t i = 0; i < n; ++i) {
-    const Alignment &a = alignments[i];
+    const InPlayAlignment &x = alignments[i];
+    const Alignment &a = x.a;
     if (a.end > coord) {
-      alignments[j++] = a;
+      alignments[j++] = x;
     } else {
+      if (x.alleleLogProbDif > 0 || x.alleleLogProbDif < 0) {
+	if (classState == 2) classOutput << '\n';
+	classOutput << querySeqNames[a.querySeqNum] << '\t'
+		    << a.queryBeg << '\t' << a.queryEnd << '\t'
+		    << refSeqNames[a.refSeqNum] << '\t'
+		    << a.beg << '\t' << a.end << '\t'
+		    << "+-"[alignmentStrandNum(a)] << '\t'
+		    << "ab"[x.alleleLogProbDif < 0] << '\t'  // or "01", "12"?
+		    << (fabs(x.alleleLogProbDif) / myLog(10)) << '\t'
+		    << x.numOfHeterozygousSites << '\n';
+	classState = 1;
+      }
       delete[] a.columns;
     }
   }
@@ -870,7 +925,7 @@ void lastGenotype(const LastGenotypeArguments &args) {
   unsigned ploidy = 0;  // shut the compiler up
   vector<uchar> genotypes;
   vector<double> genotypeCalcMatrix;
-  vector<Alignment> alignmentsHere;
+  vector<InPlayAlignment> alignmentsHere;
   vector<double> genotypeLogProbs;
   vector<uchar> colBases;
   vector<double> colProbs;
@@ -879,12 +934,18 @@ void lastGenotype(const LastGenotypeArguments &args) {
   vector<char> genotypeString;
   vector<AlignedBaseText> alignedBaseTexts;
 
+  std::ofstream classFile;
+  std::ostream &classOutput = openOut(args.class_file, classFile);
+  int classState = 0;
+
   std::cout.precision(2);
+  classFile.precision(2);
 
   while (true) {
     if (alignmentsHere.empty()) {
       if (mergeParts[0].empty()) break;
       const Alignment &a = mergeParts[0].back();
+      // XXX reset oldGenotype if new refSeqNum ???
       refSeqNum = a.refSeqNum;
       coord = a.beg;
       ploidy = ploidyOfChromosome(ploidies, refSeqNames[refSeqNum].c_str());
@@ -897,7 +958,8 @@ void lastGenotype(const LastGenotypeArguments &args) {
     while (!mergeParts[0].empty()) {
       const Alignment &a = mergeParts[0].back();
       if (a.refSeqNum > refSeqNum || a.beg > coord) break;
-      alignmentsHere.push_back(a);
+      InPlayAlignment x = {a};
+      alignmentsHere.push_back(x);
       popAlignment(mergeParts, tempFiles, partBytes);
     }
     while (true) {  // xxx bogus loop: what's the right way to do this?
@@ -956,6 +1018,16 @@ void lastGenotype(const LastGenotypeArguments &args) {
 	phaseCoverage = numOfPairedBases / 2;
 	oldAlignedBases.swap(newAlignedBases);
 	oldGenotype = newGenotype;
+
+	if (args.class_file) {
+	  if (classState == 1 && !logProbIncPhase) {
+	    // XXX what if there are any alignmentsHere with
+	    // numOfHeterozygousSites > 0 ?
+	    classState = 2;
+	  }
+	  calcAlleleProbsPerAlignment(qualTable, baseCalcMatrix, coord,
+				      alignmentsHere, &newGenotype[0]);
+	}
       }
 
       alignedBaseTexts.resize(numOfBases);
@@ -983,8 +1055,12 @@ void lastGenotype(const LastGenotypeArguments &args) {
       break;
     }
     ++coord;
-    discardOldAlignments(alignmentsHere, coord);
+    discardOldAlignments(args, alignmentsHere, coord,
+			 refSeqNames, querySeqNames, classOutput, classState);
   }
 
   std::cout << "# Tested sites: " << numOfTestedSites << '\n';
+
+  if (classFile.is_open()) classFile.close();
+  if (!classFile) err("write error: " + std::string(args.class_file));
 }
