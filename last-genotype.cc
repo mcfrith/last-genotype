@@ -477,6 +477,8 @@ static void dumpAlignments(const LastGenotypeArguments &args,
   if (args.verbose) std::cerr << "done\n";
 }
 
+static unsigned toUint(size_t x) { return x; }
+
 static void readMaf(const LastGenotypeArguments &args,
 		    vector<Alignment> &alignments,
 		    vector<std::string> &refSeqNames,
@@ -537,7 +539,8 @@ static void readMaf(const LastGenotypeArguments &args,
 	  uchar *columns = alignmentColumns(seqCodeTables, colBytes, strand,
 					    rSeq, qSeq, probSeqs, pLineCount);
 	  size_t qSeqNum = querySeqNames.size();
-	  Alignment a = {refSeqNum, rBeg, rEnd, qSeqNum, qBeg, qEnd, columns};
+	  Alignment a = {toUint(refSeqNum), rBeg, rEnd,
+			 toUint(qSeqNum), qBeg, qEnd, columns};
 	  if (a.refSeqNum < refSeqNum) err("too many reference sequences");
 	  if (a.querySeqNum < qSeqNum) err("too many query sequences");
 	  alignments.push_back(a);
