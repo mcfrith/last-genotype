@@ -79,9 +79,9 @@ static size_t alignmentDistance(const Alignment &a, const Alignment &b) {
 static bool isLessByGenome(const Alignment &a, const Alignment &b) {
   if (a.refSeqNum != b.refSeqNum) return a.refSeqNum < b.refSeqNum;
   if (a.beg != b.beg) return a.beg < b.beg;
-  // xxx stuff below here unnecessary?
+  // stuff below here is not critical, but makes the order of output more consistent
   if (a.end != b.end) return a.end < b.end;
-  return std::memcmp(a.columns, b.columns, a.end - a.beg) < 0;
+  return std::memcmp(a.columns, b.columns, bytesInColumns(a)) < 0;
 }
 
 static bool isLessByQuery(const AlignedBase &a, const AlignedBase &b) {
