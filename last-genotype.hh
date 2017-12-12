@@ -5,8 +5,10 @@
 
 struct LastGenotypeArguments {
   char **argv;
-  double min;
-  double bias;
+  double min_ref;
+  double min_2nd;
+  double bias_ref;
+  double bias_2nd;
   std::vector<const char *> ploidy;
   double furthest;
   double splice;

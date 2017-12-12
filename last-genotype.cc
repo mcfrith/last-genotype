@@ -898,7 +898,8 @@ void lastGenotype(const LastGenotypeArguments &args) {
   double baseCalcMatrix[alphLen][alphLen2];
   baseCalcMatrixFromLastTrain(args.lastTrainFile, baseCalcMatrix);
 
-  double minLogProbIncrease = args.min * myLog(10);
+  double minLogProbIncrease = args.min_ref * myLog(10);
+  double minLogProbInc2nd = args.min_2nd * myLog(10);
   double minCoveragePerRefBase[alphLen];
   calcMinCoverage(minLogProbIncrease, baseCalcMatrix, minCoveragePerRefBase);
 
@@ -988,6 +989,7 @@ void lastGenotype(const LastGenotypeArguments &args) {
       if (logProbIncRef < minLogProbIncrease) break;
       double logProb2 = genotypeLogProbs[max2];
       double logProbInc2nd = logProb1 - logProb2;
+      if (logProbInc2nd < minLogProbInc2nd) break;
       std::memcpy(&newGenotype[0], &genotypes[max1 * ploidy], ploidy);
       const uchar *genotype2nd = &genotypes[max2 * ploidy];
 
@@ -1001,8 +1003,7 @@ void lastGenotype(const LastGenotypeArguments &args) {
       double logProbIncRefRev = logProbIncRef - logProbIncRefFwd;
       double strandBiasRef =
 	(logProbIncRefFwd - logProbIncRefRev) / logProbIncRef;
-
-      if (fabs(strandBiasRef) >= args.bias) break;
+      if (fabs(strandBiasRef) >= args.bias_ref) break;
 
       double logProb2ndFwd = strandLogProb(gcm, numOfBases, &colBases[0],
 					   &colProbs[0], 0, max2);
@@ -1010,6 +1011,7 @@ void lastGenotype(const LastGenotypeArguments &args) {
       double logProbInc2ndRev = logProbInc2nd - logProbInc2ndFwd;
       double strandBias2nd =
 	(logProbInc2ndFwd - logProbInc2ndRev) / logProbInc2nd;
+      if (fabs(strandBias2nd) >= args.bias_2nd) break;
 
       double logProbIncPhase = 0;
       size_t phaseCoverage = 0;

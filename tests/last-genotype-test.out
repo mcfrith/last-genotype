@@ -4,23 +4,29 @@ Usage: last-genotype [options] last-train.out alignments.maf
 Find nucleotide substitutions relative to a reference genome.
 
 Options:
-  -h, --help            show this help message and exit
-  -b BIAS, --bias=BIAS  require that the strand bias has magnitude < BIAS
-  -m INC, --min=INC     minimum increase in log10(likelihood) over homozygous
-                        reference (default=6)
-  -p N, --ploidy=N      1=haploid, 2=diploid, etc (default='2,chrY*:1,chrM*:1')
-  -f BP, --furthest=BP  only use query sequences with colinear alignments
-                        separated by <= BP
-  -s BP, --splice=BP    only use query sequences with strong splice signals
-                        and a splice >= BP
+  -h, --help                show this help message and exit
+  -m INC, --min-ref=INC     minimum increase in log10(likelihood) over the
+                            homozygous-reference genotype (default=6)
+  -M INC, --min-2nd=INC     minimum increase in log10(likelihood) over the
+                            2nd-most-likely genotype (default=3)
+  -b BIAS, --bias-ref=BIAS  require that the strand-bias versus the
+                            homozygous-reference genotype has magnitude < BIAS
+  -B BIAS, --bias-2nd=BIAS  require that the strand-bias versus the
+                            2nd-most-likely genotype has magnitude < BIAS
+  -p N, --ploidy=N          1=haploid, 2=diploid, etc
+                            (default='2,chrY*:1,chrM*:1')
+  -f BP, --furthest=BP      only use query sequences with colinear alignments
+                            separated by <= BP
+  -s BP, --splice=BP        only use query sequences with strong splice signals
+                            and a splice >= BP
   -c FILE, --class-file=FILE         write classification of query sequences
                                      by maternal/paternal chromosome
   -S SIZE, --buffer-size=SIZE        memory limit (default=16G)
   -T DIR, --temporary-directory=DIR  put temporary files in DIR
-  -v, --verbose         show progress messages
+  -v, --verbose             show progress messages
 
-TEST last-genotype hs-rna.mat hs-rna.maf
-# last-genotype hs-rna.mat hs-rna.maf
+TEST last-genotype -M0 hs-rna.mat hs-rna.maf
+# last-genotype -M0 hs-rna.mat hs-rna.maf
 # Minimum coverage per reference base: A=3 C=3 G=3 T=3
 # Query sequences used: 852
 chr11	237086	A	GG	22	0.095	AG	2.1	-0.44	0	0	A%~ A'~ A2~ G<~ G=~ G=~ G?~ G?~ G@~ G@~ G@~ g"~ g<~ g<~ g?~ g?~ g?~
@@ -47,8 +53,8 @@ chrY	13286657	T	C	8.4	0.17	T	8.4	0.17	0	0	C;% C;) C;R C;S c<B c=O
 chrY	13286839	C	A	7	0.053	G	6.2	0.05	0	0	A") A1~ A2% A2f a1O a3B
 # Tested sites: 22134
 
-TEST last-genotype -m5 hs-rna.mat hs-rna.maf
-# last-genotype -m5 hs-rna.mat hs-rna.maf
+TEST last-genotype -M0 -m5 hs-rna.mat hs-rna.maf
+# last-genotype -M0 -m5 hs-rna.mat hs-rna.maf
 # Minimum coverage per reference base: A=2 C=2 G=2 T=2
 # Query sequences used: 852
 chr11	214543	C	TT	5.4	-0.31	CT	0.88	-0.33	0	0	T>~ tA~ tA~
@@ -104,8 +110,8 @@ chrY	13286657	T	C	8.4	0.17	T	8.4	0.17	0	0	C;% C;) C;R C;S c<B c=O
 chrY	13286839	C	A	7	0.053	G	6.2	0.05	0	0	A") A1~ A2% A2f a1O a3B
 # Tested sites: 22134
 
-TEST last-genotype -p3 hs-rna.mat hs-rna.maf
-# last-genotype -p3 hs-rna.mat hs-rna.maf
+TEST last-genotype -M0 -p3 hs-rna.mat hs-rna.maf
+# last-genotype -M0 -p3 hs-rna.mat hs-rna.maf
 # Minimum coverage per reference base: A=3 C=3 G=3 T=3
 # Query sequences used: 852
 chr11	237086	A	GGG	22	0.095	AGG	0.84	-1.1	0	0	A%~ A'~ A2~ G<~ G=~ G=~ G?~ G?~ G@~ G@~ G@~ g"~ g<~ g<~ g?~ g?~ g?~
@@ -132,8 +138,8 @@ chrY	13286657	T	CCC	8.4	0.17	CCT	0.93	0.26	0	0	C;% C;) C;R C;S c<B c=O
 chrY	13286839	C	AAA	7	0.053	AAG	0.79	0.15	0	0	A") A1~ A2% A2f a1O a3B
 # Tested sites: 22134
 
-TEST last-genotype -f1e6 -s50 hs-rna.mat hs-rna.maf
-# last-genotype -f1e6 -s50 hs-rna.mat hs-rna.maf
+TEST last-genotype -M0 -f1e6 -s50 hs-rna.mat hs-rna.maf
+# last-genotype -M0 -f1e6 -s50 hs-rna.mat hs-rna.maf
 # Minimum coverage per reference base: A=3 C=3 G=3 T=3
 # Query sequences used: 540
 chr11	237086	A	GG	22	0.095	AG	2.1	-0.44	0	0	A%~ A'~ A2~ G<~ G=~ G=~ G?~ G?~ G@~ G@~ G@~ g"~ g<~ g<~ g?~ g?~ g?~
@@ -157,8 +163,8 @@ chr11	840318	C	CT	45	0.39	TT	37	0.37	0	0	C#~ C5~ C9~ C?~ CB~ CB~ CB~ CB~ CH~ CI~
 chr11	840476	A	AG	20	0.68	AA	20	0.68	66	64	A%l A.{ A.{ A<~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ A?~ A~~ A~~ A~~ G+q G,d G,p G,p G,p G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G,q G-q G-q G-q G-q G-q G-q G-q G-q G-q a.{ a?~ a?~ a?~ a?~ a?~ a~~ a~~ a~~ a~~ a~~ g+p g+p g+p g+p g+p g+p g+p g,p g,p
 # Tested sites: 18086
 
-TEST last-genotype -f1000 hs-rna.mat hs-rna.maf
-# last-genotype -f1000 hs-rna.mat hs-rna.maf
+TEST last-genotype -M0 -f1000 hs-rna.mat hs-rna.maf
+# last-genotype -M0 -f1000 hs-rna.mat hs-rna.maf
 # Minimum coverage per reference base: A=3 C=3 G=3 T=3
 # Query sequences used: 408
 chr11	308289	T	CC	11	0.36	CT	1.9	0.38	0	0	C%~ C/~ C>~ C>~ C?~ c?~ c@~
@@ -172,8 +178,8 @@ chrY	13286657	T	C	8.4	0.17	T	8.4	0.17	0	0	C;% C;) C;R C;S c<B c=O
 chrY	13286839	C	A	7	0.053	G	6.2	0.05	0	0	A") A1~ A2% A2f a1O a3B
 # Tested sites: 8523
 
-TEST last-genotype -p3,chr1*:1 hs-rna.mat hs-rna.maf
-# last-genotype -p3,chr1*:1 hs-rna.mat hs-rna.maf
+TEST last-genotype -M0 -p3,chr1*:1 hs-rna.mat hs-rna.maf
+# last-genotype -M0 -p3,chr1*:1 hs-rna.mat hs-rna.maf
 # Minimum coverage per reference base: A=3 C=3 G=3 T=3
 # Query sequences used: 852
 chr11	237086	A	G	22	0.095	A	22	0.095	0	0	A%~ A'~ A2~ G<~ G=~ G=~ G?~ G?~ G@~ G@~ G@~ g"~ g<~ g<~ g?~ g?~ g?~
@@ -194,8 +200,8 @@ chrY	13286657	T	CCC	8.4	0.17	CCT	0.93	0.26	0	0	C;% C;) C;R C;S c<B c=O
 chrY	13286839	C	AAA	7	0.053	AAG	0.79	0.15	0	0	A") A1~ A2% A2f a1O a3B
 # Tested sites: 22134
 
-TEST last-genotype -f1000 hs-rna.mat hs-rna.maf hs-rna.maf
-# last-genotype -f1000 hs-rna.mat hs-rna.maf hs-rna.maf
+TEST last-genotype -M0 -f1000 hs-rna.mat hs-rna.maf hs-rna.maf
+# last-genotype -M0 -f1000 hs-rna.mat hs-rna.maf hs-rna.maf
 # Minimum coverage per reference base: A=3 C=3 G=3 T=3
 # Query sequences used: 816
 chr11	308289	T	CC	22	0.36	CT	3.8	0.38	0	0	C%~ C%~ C/~ C/~ C>~ C>~ C>~ C>~ C?~ C?~ c?~ c?~ c@~ c@~
@@ -233,8 +239,8 @@ chrY	13287443	T	C	11	0.41	T	11	0.41	0	0	C7% C7% C7H C7H C9C C9C c8D c8D
 chrY	18992579	T	A	7.1	0.0053	G	6.1	-0.0075	0	0	A4? A4? T"# T"# a3U a3U
 # Tested sites: 10580
 
-TEST last-genotype -v -S1M hs-rna.mat hs-rna.maf
-# last-genotype -v -S1M hs-rna.mat hs-rna.maf
+TEST last-genotype -M0 -v -S1M hs-rna.mat hs-rna.maf
+# last-genotype -M0 -v -S1M hs-rna.mat hs-rna.maf
 # Minimum coverage per reference base: A=3 C=3 G=3 T=3
 writing temporary file... done
 writing temporary file... done
@@ -263,8 +269,8 @@ chrY	13286657	T	C	8.4	0.17	T	8.4	0.17	0	0	C;% C;) C;R C;S c<B c=O
 chrY	13286839	C	A	7	0.053	G	6.2	0.05	0	0	A") A1~ A2% A2f a1O a3B
 # Tested sites: 22134
 
-TEST last-genotype -b1 hs-rna.mat hs-rna.maf
-# last-genotype -b1 hs-rna.mat hs-rna.maf
+TEST last-genotype -M0 -b1 hs-rna.mat hs-rna.maf
+# last-genotype -M0 -b1 hs-rna.mat hs-rna.maf
 # Minimum coverage per reference base: A=3 C=3 G=3 T=3
 # Query sequences used: 852
 chr11	237086	A	GG	22	0.095	AG	2.1	-0.44	0	0	A%~ A'~ A2~ G<~ G=~ G=~ G?~ G?~ G@~ G@~ G@~ g"~ g<~ g<~ g?~ g?~ g?~
@@ -291,8 +297,8 @@ chrY	13286657	T	C	8.4	0.17	T	8.4	0.17	0	0	C;% C;) C;R C;S c<B c=O
 chrY	13286839	C	A	7	0.053	G	6.2	0.05	0	0	A") A1~ A2% A2f a1O a3B
 # Tested sites: 22134
 
-TEST last-genotype -b1 -c- hs-rna.mat hs-rna.maf
-# last-genotype -b1 -c- hs-rna.mat hs-rna.maf
+TEST last-genotype -M0 -b1 -c- hs-rna.mat hs-rna.maf
+# last-genotype -M0 -b1 -c- hs-rna.mat hs-rna.maf
 # Minimum coverage per reference base: A=3 C=3 G=3 T=3
 # Query sequences used: 852
 chr11	237086	A	GG	22	0.095	AG	2.1	-0.44	0	0	A%~ A'~ A2~ G<~ G=~ G=~ G?~ G?~ G@~ G@~ G@~ g"~ g<~ g<~ g?~ g?~ g?~

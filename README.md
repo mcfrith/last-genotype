@@ -1,8 +1,18 @@
 # last-genotype
 
-This program identifies nucleotide substitutions relative to a
-reference genome, from [LAST](http://last.cbrc.jp/) alignments of DNA
-(or RNA) reads.
+This program identifies substitutions relative to a reference genome,
+from alignments of DNA (or RNA) reads.  It was designed for long,
+error-prone reads (e.g. nanopore, PacBio).  Example output:
+
+    chr7   1234000   AG
+    chr7   1235000   CT
+
+This means that one of the (maternal and paternal) chromosomes 7 has
+`A` at position 1234000 and `C` at 1235000, while the other has `G` at
+1234000 and `T` at 1235000.
+
+`last-genotype` can also classify the reads by which (maternal or
+paternal) chromosome they are from.
 
 # Install
 
@@ -19,25 +29,40 @@ First, find the substitution rates, and align the DNA (or RNA) reads,
 as described
 [here](https://github.com/mcfrith/last-rna/blob/master/last-long-reads.md).
 
-It's somewhat recommended to make one modification to these alignment
-recipes: add `-j4` to the `lastal` options.  `-j4` does not change the
+It's recommended to make one modification to these alignment recipes:
+add `-j4` to the `lastal` options.  `-j4` does not change the
 alignments, but it adds information about the reliability of each
-aligned column (and makes `lastal` slower).
+aligned column, which makes `last-genotype` more accurate.
+Unfortunately, it makes `lastal` slower: therefore, for whole large
+genome (e.g. human) data it's recommended to align with
+repeat-masking.
 
 In any case, you should get a file with substitution rates
 (e.g. `myseq.par`), and a file of alignments (e.g. `myseq.maf`).
 Now, run `last-genotype` like this:
 
-    last-genotype -b1 myseq.par myseq.maf > out.txt
+    last-genotype -B1 myseq.par myseq.maf > out.txt
 
-The `-b1` option tells it to require substitution evidence from both
-strands.  (Omit this if e.g. your reads are from RNA forward strands
-only.)
+The `-B1` option makes it only output genotypes that are supported on
+both strands.  (Omit this if e.g. your reads are from RNA forward
+strands only.)
 
 The input files may be compressed in gzip (.gz) format. You can also
-pipe in the alignments, for example:
+pipe in the alignments:
 
-    bzcat myseq.maf.bz2 | last-genotype -b1 myseq.par > out.txt
+    ... | last-genotype -B1 myseq.par > out.txt
+
+## Less-strict usage
+
+The preceding usage only outputs high-confidence genotypes.
+Sometimes, `last-genotype` has high confidence that there is some
+substitution but low confidence about the exact genotype.  The
+following usage outputs such sites too:
+
+    last-genotype -M0 -b1 myseq.par myseq.maf > out.txt
+
+The `-b1` makes it require substitution evidence from both strands.
+(Omit this if e.g. your reads are from RNA forward strands only.)
 
 ## Output format
 
@@ -54,9 +79,7 @@ The output is a table with 12 tab-delimited columns, like this:
 
 * Column 3: the base at this site in the reference genome.
 
-* Column 4: the predicted genotype.  For example, `CC` means that the
-  maternal and paternal chromosomes both have `C` at this site, while
-  `AC` means that one has `A` and one has `C`.
+* Column 4: the predicted genotype.
 
 * Column 5: log10[ likelihood(predicted genotype) /
   likelihood(homozygous reference) ].
@@ -139,11 +162,19 @@ files, but you can measure disk usage with a command such as `df -h`.
 
 - `-h`, `--help`: show a help message and exit.
 
-- `-m INC`, `--min=INC`: minimum increase in log10(likelihood) over
-  homozygous reference (default=6).
+- `-m INC`, `--min-ref=INC`: minimum increase in log10(likelihood)
+  over the homozygous-reference genotype (default=6).
 
-- `-b INC`, `--bias=INC`: require that the column-6 strand bias has
-  magnitude < BIAS.
+- `-M INC`, `--min-2nd=INC`: minimum increase in log10(likelihood)
+  over the 2nd-most-likely genotype (default=3).
+
+- `-b BIAS`, `--bias-ref=BIAS`: require that the strand bias versus
+  the homozygous-reference genotype (column 6) has magnitude < BIAS.
+
+- `-B BIAS`, `--bias-2nd=BIAS`: require that the strand bias versus
+  the 2nd-most-likely genotype (column 9) has magnitude < BIAS.  If
+  you specify `-B` but not `-b`, then `-b` will be set to the same
+  value as `-B`.
 
 - `-p N`, `--ploidy=N`: 1=haploid, 2=diploid, etc
   (default=`'2,chrY*:1,chrM*:1'`).
@@ -199,7 +230,7 @@ You can specify chromosome names using these symbols:
 
 If you use the class-file option:
 
-    last-genotype -c classify.txt -b1 myseq.par myseq.maf > out.txt
+    last-genotype -c classify.txt -B1 myseq.par myseq.maf > out.txt
 
 `last-genotype` will write a file showing which (maternal or paternal)
 chromosome each read is from.  This file has 10 tab-delimited columns:
@@ -257,8 +288,8 @@ blank-line-separated block of lines.
   cancer, where one site may have, say, 27% `A` and 73% `C`.  But it
   will often identify such sites as heterozygous, which may be useful.
 
-* Phasing (and classifying reads) is attempted only for diploid
-  chromosomes.
+* Phasing (and classifying reads) is not attempted for chromosomes
+  with ploidy > 2.
 
 * For RNA reads: it makes no attempt to distinguish between genomic
   substitutions and RNA editing.  Also, if there is allele-biased

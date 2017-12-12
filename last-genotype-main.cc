@@ -47,8 +47,10 @@ static size_t defaultBufferSize() {
 static void run(int argc, char **argv) {
   LastGenotypeArguments args;
   args.argv = argv;
-  args.min = 6;
-  args.bias = DBL_MAX;
+  args.min_ref = 6;
+  args.min_2nd = 3;
+  args.bias_ref = DBL_MAX;
+  args.bias_2nd = DBL_MAX;
   args.ploidy.push_back("2,chrY*:1,chrM*:1");
   args.furthest = -1;
   args.splice = -1;
@@ -64,31 +66,40 @@ Usage: " << argv[0] << " [options] last-train.out alignments.maf\n\
 Find nucleotide substitutions relative to a reference genome.\n\
 \n\
 Options:\n\
-  -h, --help            show this help message and exit\n\
-  -b BIAS, --bias=BIAS  require that the strand bias has magnitude < BIAS\n\
-  -m INC, --min=INC     minimum increase in log10(likelihood) over homozygous\n\
-                        reference (default=" << args.min << ")\n\
-  -p N, --ploidy=N      1=haploid, 2=diploid, etc (default='"
-       << args.ploidy[0] << "')\n\
-  -f BP, --furthest=BP  only use query sequences with colinear alignments\n\
-                        separated by <= BP\n\
-  -s BP, --splice=BP    only use query sequences with strong splice signals\n\
-                        and a splice >= BP\n\
+  -h, --help                show this help message and exit\n\
+  -m INC, --min-ref=INC     minimum increase in log10(likelihood) over the\n\
+                            homozygous-reference genotype (default="
+       << args.min_ref << ")\n\
+  -M INC, --min-2nd=INC     minimum increase in log10(likelihood) over the\n\
+                            2nd-most-likely genotype (default="
+       << args.min_2nd << ")\n\
+  -b BIAS, --bias-ref=BIAS  require that the strand-bias versus the\n\
+                            homozygous-reference genotype has magnitude < BIAS\n\
+  -B BIAS, --bias-2nd=BIAS  require that the strand-bias versus the\n\
+                            2nd-most-likely genotype has magnitude < BIAS\n\
+  -p N, --ploidy=N          1=haploid, 2=diploid, etc\n\
+                            (default='" << args.ploidy[0] << "')\n\
+  -f BP, --furthest=BP      only use query sequences with colinear alignments\n\
+                            separated by <= BP\n\
+  -s BP, --splice=BP        only use query sequences with strong splice signals\n\
+                            and a splice >= BP\n\
   -c FILE, --class-file=FILE         write classification of query sequences\n\
                                      by maternal/paternal chromosome\n\
   -S SIZE, --buffer-size=SIZE        memory limit (default="
        << (args.buffer_size / 1024 / 1024 / 1024) << "G)\n\
   -T DIR, --temporary-directory=DIR  put temporary files in DIR\n\
-  -v, --verbose         show progress messages\n\
-  -V, --version         show version number and exit\n\
+  -v, --verbose             show progress messages\n\
+  -V, --version             show version number and exit\n\
 ";
 
-  const char sOpts[] = "hm:b:p:f:s:c:S:T:vV";
+  const char sOpts[] = "hm:M:b:B:p:f:s:c:S:T:vV";
 
   static struct option lOpts[] = {
     { "help",                no_argument,       0, 'h' },
-    { "min",                 required_argument, 0, 'm' },
-    { "bias",                required_argument, 0, 'b' },
+    { "min-ref",             required_argument, 0, 'm' },
+    { "min-2nd",             required_argument, 0, 'M' },
+    { "bias-ref",            required_argument, 0, 'b' },
+    { "bias-2nd",            required_argument, 0, 'B' },
     { "ploidy",              required_argument, 0, 'p' },
     { "furthest",            required_argument, 0, 'f' },
     { "splice",              required_argument, 0, 's' },
@@ -107,10 +118,16 @@ Options:\n\
       std::cout << help.str();
       return;
     case 'm':
-      args.min = doubleFromString(optarg);
+      args.min_ref = doubleFromString(optarg);
+      break;
+    case 'M':
+      args.min_2nd = doubleFromString(optarg);
       break;
     case 'b':
-      args.bias = doubleFromString(optarg);
+      args.bias_ref = doubleFromString(optarg);
+      break;
+    case 'B':
+      args.bias_2nd = doubleFromString(optarg);
       break;
     case 'p':
       args.ploidy.push_back(optarg);
@@ -147,6 +164,11 @@ Options:\n\
   if (optind > argc - 1) {
     std::cerr << help.str();
     throw std::runtime_error("");
+  }
+
+  // it can happen that |ref strand bias| > 1 and |2nd strand bias| < 1
+  if (args.bias_ref >= DBL_MAX) {
+    args.bias_ref = args.bias_2nd;
   }
 
   args.lastTrainFile = argv[optind++];
