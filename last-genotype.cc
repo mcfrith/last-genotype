@@ -634,10 +634,10 @@ static void getAlignedBases(size_t coord,
   }
 }
 
-static void calcAlleleProbsPerAlignment(const double *qualTable,
-					double baseCalcMatrix[][alphLen2],
+static void calcAlleleProbsPerAlignment(double baseCalcMatrix[][alphLen2],
 					size_t coord,
 					vector<InPlayAlignment> &alignments,
+					const double *colProbs,
 					const uchar *genotype) {
   const double *rowA = baseCalcMatrix[genotype[0]];
   const double *rowB = baseCalcMatrix[genotype[1]];
@@ -648,7 +648,7 @@ static void calcAlleleProbsPerAlignment(const double *qualTable,
     if (queryBase >= alphLen2) continue;
     ++alignments[i].numOfHeterozygousSites;
 
-    double colProb = qualTable[c[1]] * qualTable[c[2]];
+    double colProb = *colProbs++;
     double a = colProb * rowA[queryBase] + 1;
     double b = colProb * rowB[queryBase] + 1;
     alignments[i].alleleLogProbDif += myLog(a / b);
@@ -949,8 +949,8 @@ void lastGenotype(const LastGenotypeArguments &args) {
   vector<double> genotypeCalcMatrix;
   vector<InPlayAlignment> alignmentsHere;
   vector<double> genotypeLogProbs;
-  vector<uchar> colBases;
-  vector<double> colProbs;
+  vector<uchar> colBases, pairBases;
+  vector<double> colProbs, pairProbs;
   vector<AlignedBase> oldAlignedBases, newAlignedBases;
   vector<uchar> oldGenotype, newGenotype;
   vector<char> genotypeString;
@@ -1038,10 +1038,10 @@ void lastGenotype(const LastGenotypeArguments &args) {
 	getAlignedBases(coord, alignmentsHere, &colProbs[0], newAlignedBases);
 	sort(newAlignedBases.begin(), newAlignedBases.end(), isLessByQuery);
 	size_t numOfPairedBases = findPairs(oldAlignedBases, newAlignedBases,
-					    colBases, colProbs);
+					    pairBases, pairProbs);
 	logProbIncPhase = doPhase(baseCalcMatrix, oldGenotype, newGenotype,
 				  numOfPairedBases,
-				  &colBases[0], &colProbs[0]);
+				  &pairBases[0], &pairProbs[0]);
 	phaseCoverage = numOfPairedBases / 2;
 	oldAlignedBases.swap(newAlignedBases);
 	oldGenotype = newGenotype;
@@ -1052,8 +1052,8 @@ void lastGenotype(const LastGenotypeArguments &args) {
 	    // numOfHeterozygousSites > 0 ?
 	    classState = 2;
 	  }
-	  calcAlleleProbsPerAlignment(qualTable, baseCalcMatrix, coord,
-				      alignmentsHere, &newGenotype[0]);
+	  calcAlleleProbsPerAlignment(baseCalcMatrix, coord, alignmentsHere,
+				      &colProbs[0], &newGenotype[0]);
 	}
       }
 
