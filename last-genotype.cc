@@ -96,6 +96,14 @@ static void err(const std::string& s) {
   throw std::runtime_error(s);
 }
 
+static void resizeIfSmaller(std::vector<uchar> &v, size_t s) {
+  if (v.size() < s) v.resize(s);
+}
+
+static void resizeIfSmaller(std::vector<double> &v, size_t s) {
+  if (v.size() < s) v.resize(s);
+}
+
 static StringView &munch(StringView &in, const char *text) {
   // xxx skip whitespace?
   const char *b = in.begin();
@@ -109,6 +117,7 @@ static StringView &munch(StringView &in, const char *text) {
 }
 
 static std::istream &openIn(const char *fileName, mcf::izstream &ifs) {
+  assert(fileName);
   if (isChar(fileName, '-')) return std::cin;
   ifs.open(fileName);
   if (!ifs) err("can't open file: " + std::string(fileName));
@@ -426,6 +435,12 @@ static void checkSequenceLength(StringView sequence, size_t length) {
   if (sequence.size() != length) err("unequal MAF block lengths");
 }
 
+static void checkAllLengths(const StringView *s, unsigned c, size_t length) {
+  for (unsigned i = 0; i < c; ++i) {
+    checkSequenceLength(s[i], length);
+  }
+}
+
 static uchar *alignmentColumns(uchar seqCodeTables[][numOfChars],
 			       size_t colBytes,
 			       StringView strand,
@@ -435,8 +450,7 @@ static uchar *alignmentColumns(uchar seqCodeTables[][numOfChars],
 			       unsigned pLineCount) {
   size_t n = rSeq.size();
   checkSequenceLength(qSeq, n);
-  if (pLineCount > 0) checkSequenceLength(probSeqs[0], n);
-  if (pLineCount > 1) checkSequenceLength(probSeqs[1], n);
+  checkAllLengths(probSeqs, pLineCount, n);
   const uchar *rTable = seqCodeTables[0];
   const uchar *qTable = seqCodeTables[(strand[0] == '-') ? 2 : 1];
   uchar *columns = new uchar[colBytes];
@@ -491,14 +505,16 @@ static void readMaf(const LastGenotypeArguments &args,
 
   bool isBad = false;
   size_t queryStart = alignments.size();
+  const unsigned pLineMax = 2;
   unsigned sLineCount = 0;
   unsigned pLineCount = 0;
   std::string aLine;
   std::string sLineBuf[4];
   std::string *sLines = sLineBuf;
-  std::string pLines[2];
+  std::string pLines[pLineMax];
   std::string line;
-  StringView rName, qName, qNameOld, strand, rSeq, qSeq, probSeqs[2];
+  StringView rName, qName, qNameOld, strand, rSeq, qSeq;
+  StringView probSeqs[pLineMax];
 
   do {  // unusual getline loop: simulate extra final blank line
     getline(in, line);
@@ -511,7 +527,7 @@ static void readMaf(const LastGenotypeArguments &args,
       line.swap(sLines[sLineCount]);
       ++sLineCount;
     } else if (*s == 'p') {
-      if (pLineCount > 1) err("too many MAF p lines");
+      if (pLineCount >= pLineMax) err("too many MAF p lines");
       line.swap(pLines[pLineCount]);
       parseProbLine(pLines[pLineCount], probSeqs[pLineCount]);
       ++pLineCount;
@@ -582,13 +598,14 @@ static void readAlignmentFiles(const LastGenotypeArguments &args,
   std::cout << "# Query sequences used: " << querySeqNames.size() << '\n';
 }
 
-static size_t preprocessColumns(const double *qualTable, size_t coord,
+static size_t preprocessColumns(const double *qualTable,
+				size_t coord,
 				const vector<InPlayAlignment> &alignments,
 				vector<uchar> &colBases,
 				vector<double> &colProbs) {
   size_t n = alignments.size();
-  if (colBases.size() < n) colBases.resize(n);
-  if (colProbs.size() < n) colProbs.resize(n);
+  resizeIfSmaller(colBases, n);
+  resizeIfSmaller(colProbs, n);
   size_t numOfBases = 0;
   for (size_t i = 0; i < n; ++i) {
     const uchar *c = columnFromAlignment(alignments[i], coord);
@@ -601,8 +618,9 @@ static size_t preprocessColumns(const double *qualTable, size_t coord,
   return numOfBases;
 }
 
-static void getAlignedBases(const double *qualTable, size_t coord,
+static void getAlignedBases(size_t coord,
 			    const vector<InPlayAlignment> &alignments,
+			    const double *colProbs,
 			    vector<AlignedBase> &alignedBases) {
   size_t j = 0;
   for (size_t i = 0; i < alignments.size(); ++i) {
@@ -611,7 +629,7 @@ static void getAlignedBases(const double *qualTable, size_t coord,
     if (queryBase >= alphLen2) continue;
     alignedBases[j].querySeqNum = alignments[i].a.querySeqNum;
     alignedBases[j].queryBase = queryBase;
-    alignedBases[j].prob = qualTable[c[1]] * qualTable[c[2]];
+    alignedBases[j].prob = colProbs[j];
     ++j;
   }
 }
@@ -747,8 +765,8 @@ static size_t findPairs(const vector<AlignedBase> &x,
 			vector<uchar> &pairBases, vector<double> &pairProbs) {
   size_t xs = x.size();
   size_t ys = y.size();
-  if (pairBases.size() < xs + ys) pairBases.resize(xs + ys);
-  if (pairProbs.size() < xs + ys) pairProbs.resize(xs + ys);
+  resizeIfSmaller(pairBases, xs + ys);
+  resizeIfSmaller(pairProbs, xs + ys);
   size_t xi = 0;
   size_t yi = 0;
   size_t j = 0;
@@ -1017,7 +1035,7 @@ void lastGenotype(const LastGenotypeArguments &args) {
       size_t phaseCoverage = 0;
       if (ploidy == 2 && newGenotype[0] != newGenotype[1]) {
 	newAlignedBases.resize(numOfBases);
-	getAlignedBases(qualTable, coord, alignmentsHere, newAlignedBases);
+	getAlignedBases(coord, alignmentsHere, &colProbs[0], newAlignedBases);
 	sort(newAlignedBases.begin(), newAlignedBases.end(), isLessByQuery);
 	size_t numOfPairedBases = findPairs(oldAlignedBases, newAlignedBases,
 					    colBases, colProbs);
