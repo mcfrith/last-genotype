@@ -605,3 +605,10 @@ chrY	13286657	T	C	8.4	0.17	T	8.4	0.17	0	0	C;% C;) C;R C;S c<B c=O
 chrY	13286839	C	A	7	0.053	G	6.2	0.05	0	0	A") A1~ A2% A2f a1O a3B
 # Tested sites: 22134
 
+TEST last-genotype hs-rna.mat ambig.maf
+# last-genotype hs-rna.mat ambig.maf
+# Minimum coverage per reference base: A=3 C=3 G=3 T=3
+# Query sequences used: 299
+chr19	17671244	S	CG	7.6	1.4	GG	7.6	1.4	0	0	A(~ A)~ A)~ A)~ A)~ A)~ A)~ A)~ A)~ A)~ C$j C$~ C&~ C(j C({ C(~ C(~ C(~ C(~ C(~ C(~ C(~ C(~ C(~ C(~ C(~ C(~ C(~ C(~ C(~ C)l C)~ C)~ C)~ C)~ C)~ C)~ C)~ C)~ C)~ C)~ C)~ C)~ C)~ C)~ C)~ C)~ C)~ G$w G'P G'~ G'~ G'~ G'~ G'~ G*x G++ G+~ G+~ G+~ G+~ G+~ G+~ G+~ G+~ G+~ G+~ G+~ G+~ G+~ G+~ G+~ G+~ G+~ G+~ G+~ G+~ G+~ G+~ G+~ G+~ G+~ G+~ G+~ G+~ G+~ a$w c&: c(T c(z c(~ c(~ c(~ c(~ c(~ c(~ c(~ c(~ c(~ c(~ c(~ c(~ c(~ c(~ c(~ c(~ c(~ c(~ c(~ c(~ c(~ c(~ c(~ c(~ c(~ c)~ g"k g"l g$t g%z g%z g%~ g&w g&~ g&~ g&~ g(v g(~ g(~ g(~ g(~ g(~ g(~ g(~ g(~ g)~ g)~ g)~ g*L g*m g*~ g+~ g+~ g+~ g+~ g+~ g+~ g+~ g+~ g+~ g+~ g+~ g+~ g+~ g+~ g+~ g+~ g+~ g+~ g+~ g+~ g+~ g+~ g+~ g+~ g+~ g+~ g+~ g+~ g+~ g+~ g+~ g+~ g+~ g+~ g+~ g+~ g+~ g+~ g+~ g+~
+# Tested sites: 3
+

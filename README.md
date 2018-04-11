@@ -273,7 +273,22 @@ switch to the opposite (maternal or paternal) chromosome.  In other
 words, the classification is meaningful only within each
 blank-line-separated block of lines.
 
+## Ambiguous bases
+
+The reference genome might have ambiguous bases (e.g. `W` meaning `A`
+or `T`).  In such cases, the "homozygous reference" genotype is the
+one (e.g. either `AA` or `TT`) with maximum likelihood.
+
+Currently, `last-genotype` allows doubly-ambiguous bases but skips
+triply- and quadruply-ambiguous bases.
+
 ## Limitations
+
+* `last-genotype` may miss some substitutions (especially heterozygous
+  ones) due to *alignment reference-bias*: the aligner is biased
+  towards aligning same bases, and against aligning different bases.
+  You can avoid this by putting ambiguous bases in the reference
+  sequence before aligning (but you have to know which bases).
 
 * It only finds substitutions (not deletions, insertions, inversions,
   etc.)

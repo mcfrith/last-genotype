@@ -9,6 +9,7 @@
 #include <fnmatch.h>
 
 #include <cassert>
+#include <cctype>
 #include <cstdlib>  // strtod
 #include <fstream>
 #include <iostream>
@@ -24,6 +25,8 @@ typedef const char *const_char_p;
 
 const size_t maxSize = -1;
 const size_t numOfChars = UCHAR_MAX + 1;
+const char dnaSymbols[] = "ACGT" "MSKWRY";
+const unsigned numOfDnaSymbols = (sizeof dnaSymbols) - 1;
 const unsigned alphLen = 4;
 const unsigned alphLen2 = alphLen * 2;
 const size_t bytesPerAlignmentColumn = 3;
@@ -199,7 +202,7 @@ static void makeGenotypes(vector<uchar> &genotypes, unsigned ploidy) {
   }
 }
 
-static size_t homozygousGenotypeIndex(unsigned ploidy, unsigned baseCode) {
+static size_t homozygousIndex(unsigned ploidy, unsigned baseCode) {
   size_t r = 0;
   switch (baseCode) {
   case 3:
@@ -210,6 +213,20 @@ static size_t homozygousGenotypeIndex(unsigned ploidy, unsigned baseCode) {
     r += (ploidy + 2) * (ploidy + 1) * ploidy / 6;
   }
   return r;
+}
+
+static size_t homozygousGenotypeIndex(unsigned ploidy, unsigned baseCode,
+				      const double *genotypeLogProbs) {
+  if (baseCode < alphLen) return homozygousIndex(ploidy, baseCode);
+
+  // xxx fragile: depends on the order of dnaSymbols
+  unsigned baseCode1 = baseCode % alphLen;
+  unsigned offset = baseCode / alphLen;
+  unsigned baseCode2 = (baseCode + offset) % alphLen;
+
+  size_t i1 = homozygousIndex(ploidy, baseCode1);
+  size_t i2 = homozygousIndex(ploidy, baseCode2);
+  return (genotypeLogProbs[i1] < genotypeLogProbs[i2]) ? i2 : i1;
 }
 
 static void makeGenotypeCalc(double baseCalcMatrix[][alphLen2],
@@ -298,9 +315,16 @@ static void calcMinCoverage(double minLogProbIncrease,
     // xxx may be div 0 -> inf
   }
 
+  // xxx minimum coverage for ambiguous bases, may be too low:
+  double minVal = *std::min_element(minCoveragePerRefBase,
+				    minCoveragePerRefBase + alphLen);
+  for (unsigned r = alphLen; r < numOfDnaSymbols; ++r) {
+    minCoveragePerRefBase[r] = minVal;
+  }
+
   std::cout << "# Minimum coverage per reference base:";
   for (unsigned i = 0; i < alphLen; ++i) {
-    std::cout << ' ' << "ACGT"[i] << '=' << ceil(minCoveragePerRefBase[i]);
+    std::cout << ' ' << dnaSymbols[i] << '=' << ceil(minCoveragePerRefBase[i]);
   }
   std::cout << '\n';
 }
@@ -319,17 +343,19 @@ static size_t stringIndex(vector<std::string> &strings, StringView s) {
 
 static void makeSeqCodeTables(uchar seqCodeTables[][numOfChars]) {
   for (size_t i = 0; i < numOfChars; ++i) {
-    seqCodeTables[0][i] = alphLen * 16;
+    seqCodeTables[0][i] = numOfDnaSymbols * 16;
     seqCodeTables[1][i] = alphLen * 2;
     seqCodeTables[2][i] = alphLen * 2 + 1;
   }
 
-  for (unsigned i = 0; i < alphLen; ++i) {
-    uchar x = "ACGT"[i];
-    uchar y = "acgt"[i];
+  for (unsigned i = 0; i < numOfDnaSymbols; ++i) {
+    uchar x = dnaSymbols[i];
+    uchar y = std::tolower(x);
     seqCodeTables[0][x] = seqCodeTables[0][y] = i * 16;
-    seqCodeTables[1][x] = seqCodeTables[1][y] = i * 2;
-    seqCodeTables[2][x] = seqCodeTables[2][y] = i * 2 + 1;
+    if (i < alphLen) {
+      seqCodeTables[1][x] = seqCodeTables[1][y] = i * 2;
+      seqCodeTables[2][x] = seqCodeTables[2][y] = i * 2 + 1;
+    }
   }
 }
 
@@ -818,7 +844,7 @@ static double doPhase(double baseCalcMatrix[][alphLen2],
 static void decodeGenotype(unsigned ploidy, const uchar *in, char *out) {
   for (unsigned i = 0; i < ploidy; ++i) {
     assert(in[i] < alphLen);
-    out[i] = "ACGT"[in[i]];
+    out[i] = dnaSymbols[in[i]];
   }
 }
 
@@ -918,7 +944,7 @@ void lastGenotype(const LastGenotypeArguments &args) {
 
   double minLogProbIncrease = args.min_ref * myLog(10);
   double minLogProbInc2nd = args.min_2nd * myLog(10);
-  double minCoveragePerRefBase[alphLen];
+  double minCoveragePerRefBase[numOfDnaSymbols];
   calcMinCoverage(minLogProbIncrease, baseCalcMatrix, minCoveragePerRefBase);
 
   vector<Alignment> alignments;
@@ -990,7 +1016,7 @@ void lastGenotype(const LastGenotypeArguments &args) {
     }
     while (true) {  // xxx bogus loop: what's the right way to do this?
       unsigned refBase = columnFromAlignment(alignmentsHere[0], coord)[0] / 16;
-      if (refBase >= alphLen) break;
+      if (refBase >= numOfDnaSymbols) break;
       if (alignmentsHere.size() < minCoveragePerRefBase[refBase]) break;
       ++numOfTestedSites;
       size_t numOfBases = preprocessColumns(qualTable, coord, alignmentsHere,
@@ -998,7 +1024,8 @@ void lastGenotype(const LastGenotypeArguments &args) {
       if (isAll(refBase, numOfBases, &colBases[0])) break;  // makes it faster
       calcLogProbs(&genotypeCalcMatrix[0], numOfBases,
 		   &colBases[0], &colProbs[0], genotypeLogProbs);
-      size_t refGenotypeIndex = homozygousGenotypeIndex(ploidy, refBase);
+      size_t refGenotypeIndex = homozygousGenotypeIndex(ploidy, refBase,
+							&genotypeLogProbs[0]);
       double refLogProb = genotypeLogProbs[refGenotypeIndex];
       size_t max1, max2;
       findTopTwo(genotypeLogProbs, max1, max2);
@@ -1063,7 +1090,7 @@ void lastGenotype(const LastGenotypeArguments &args) {
 
       std::cout << refSeqNames[refSeqNum] << '\t'
 		<< coord << '\t'
-		<< "ACGT"[refBase] << '\t';
+		<< dnaSymbols[refBase] << '\t';
       decodeGenotype(ploidy, &newGenotype[0], &genotypeString[0]);
       std::cout << &genotypeString[0] << '\t'
 		<< (logProbIncRef / myLog(10)) << '\t'
