@@ -68,9 +68,9 @@ The `-b1` makes it require substitution evidence from both strands.
 
 The output is a table with 12 tab-delimited columns, like this:
 
-    chr20   1118650   T   CC   9.4   -0.15   CT   1.5   -0.2   0    0   C~ C~ cq c~ c~
-    chr20   3213195   C   AC   8.7   -0.05   AT   5.6   0.37   0    0   A~ A~ C~ C~ a~ a~ c~
-    chr20   3223437   G   AG   6.8   -0.31   AA   3.2   0.51   13   7   A~ A~ G~ G~ a~ a~ a~ g~
+    chr20   1118650   T   CC   9.4   -0.15   CT   1.5   -0.2   0    0   C%~ C$c c3O c5~ c9~
+    chr20   3213195   C   AC   8.7   -0.05   AT   5.6   0.37   0    0   A?c A=c C;) C<B a=O a3B c2f
+    chr20   3223437   G   AG   6.8   -0.31   AA   3.2   0.51   13   7   A5c A=~ G*[ G:` a;R a1O a3B g=O
 
 * Column 1: chromosome name.
 
@@ -115,14 +115,14 @@ the `C` at 3213195 and `G` at 3223437 on the other chromosome.
 * Column 11: number of reads with aligned bases at both sites.
 
 * Column 12: the observed bases at this site, with symbols indicating
-  their alignment reliability.  Each base is followed by either one
-  symbol (if `-j4` was not used), or two (if `-j4` was used).  The
-  first symbol, if present, comes from `-j4` and is described
-  [here](http://last.cbrc.jp/doc/last-tutorial.html#example-10-ambiguity-of-alignment-columns).
+  their alignment reliability.  Each base is followed by two symbols
+  (if `-j4` was used).  The first symbol comes from `lastal -j4` and
+  is described
+  [here](https://gitlab.com/mcfrith/last/-/blob/main/doc/last-cookbook.rst).
   The second symbol comes from last-split and is described
-  [here](http://last.cbrc.jp/doc/last-split.html#output).  Lowercase
-  bases indicate reverse-strand observations; for example `g+` means
-  that, actually, a `C` was observed on the reverse strand.
+  [here](https://gitlab.com/mcfrith/last/-/blob/main/doc/last-split.rst).
+  Lowercase bases indicate reverse-strand observations; for example
+  `g5+` means that, actually, a `C` was observed on the reverse strand.
 
 By default, `last-genotype` only shows sites with
 log10[ likelihood(predicted genotype) / likelihood(homozygous reference) ] >=
