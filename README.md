@@ -33,9 +33,7 @@ It's recommended to make one modification to these alignment recipes:
 add `-j4` to the `lastal` options.  `-j4` does not change the
 alignments, but it adds information about the reliability of each
 aligned column, which makes `last-genotype` more accurate.
-Unfortunately, it makes `lastal` slower: therefore, for whole large
-genome (e.g. human) data it's recommended to align with
-repeat-masking.
+Unfortunately, it makes `lastal` slower.
 
 In any case, you should get a file with substitution rates
 (e.g. `myseq.par`), and a file of alignments (e.g. `myseq.maf`).

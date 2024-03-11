@@ -1000,7 +1000,7 @@ void lastGenotype(const LastGenotypeArguments &args) {
 	makeGenotypes(genotypes, ploidy);
 	makeGenotypeCalc(baseCalcMatrix, ploidy, genotypes,
 			 genotypeCalcMatrix);
-	genotypeLogProbs.resize(genotypes.size() / ploidy);
+	genotypeLogProbs.resize(genotypeCalcMatrix.size() / alphLen2);
 	newGenotype.resize(ploidy);
 	genotypeString.assign(ploidy + 1, 0);
 	oldAlignedBases.clear();
@@ -1022,7 +1022,8 @@ void lastGenotype(const LastGenotypeArguments &args) {
       size_t numOfBases = preprocessColumns(qualTable, coord, alignmentsHere,
 					    colBases, colProbs);
       if (isAll(refBase, numOfBases, &colBases[0])) break;  // makes it faster
-      calcLogProbs(&genotypeCalcMatrix[0], numOfBases,
+      const double *gcm = &genotypeCalcMatrix[0];
+      calcLogProbs(gcm, numOfBases,
 		   &colBases[0], &colProbs[0], genotypeLogProbs);
       size_t refGenotypeIndex = homozygousGenotypeIndex(ploidy, refBase,
 							&genotypeLogProbs[0]);
@@ -1035,10 +1036,7 @@ void lastGenotype(const LastGenotypeArguments &args) {
       double logProb2 = genotypeLogProbs[max2];
       double logProbInc2nd = logProb1 - logProb2;
       if (logProbInc2nd < minLogProbInc2nd) break;
-      std::memcpy(&newGenotype[0], &genotypes[max1 * ploidy], ploidy);
-      const uchar *genotype2nd = &genotypes[max2 * ploidy];
 
-      const double *gcm = &genotypeCalcMatrix[0];
       double logProb1stFwd = strandLogProb(gcm, numOfBases, &colBases[0],
 					   &colProbs[0], 0, max1);
 
@@ -1058,6 +1056,7 @@ void lastGenotype(const LastGenotypeArguments &args) {
 	(logProbInc2ndFwd - logProbInc2ndRev) / logProbInc2nd;
       if (fabs(strandBias2nd) >= args.bias_2nd) break;
 
+      std::memcpy(&newGenotype[0], &genotypes[max1 * ploidy], ploidy);
       double logProbIncPhase = 0;
       size_t phaseCoverage = 0;
       if (ploidy == 2 && newGenotype[0] != newGenotype[1]) {
@@ -1095,7 +1094,7 @@ void lastGenotype(const LastGenotypeArguments &args) {
       std::cout << &genotypeString[0] << '\t'
 		<< (logProbIncRef / myLog(10)) << '\t'
 		<< strandBiasRef << '\t';
-      decodeGenotype(ploidy, genotype2nd, &genotypeString[0]);
+      decodeGenotype(ploidy, &genotypes[max2 * ploidy], &genotypeString[0]);
       std::cout << &genotypeString[0] << '\t'
 		<< (logProbInc2nd / myLog(10)) << '\t'
 		<< strandBias2nd << '\t';
