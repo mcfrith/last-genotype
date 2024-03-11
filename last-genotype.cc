@@ -1023,18 +1023,15 @@ void lastGenotype(const LastGenotypeArguments &args) {
 					    colBases, colProbs);
       if (isAll(refBase, numOfBases, &colBases[0])) break;  // makes it faster
       const double *gcm = &genotypeCalcMatrix[0];
+      double *logs = &genotypeLogProbs[0];
       calcLogProbs(gcm, numOfBases,
 		   &colBases[0], &colProbs[0], genotypeLogProbs);
-      size_t refGenotypeIndex = homozygousGenotypeIndex(ploidy, refBase,
-							&genotypeLogProbs[0]);
-      double refLogProb = genotypeLogProbs[refGenotypeIndex];
+      size_t refGenotypeIndex = homozygousGenotypeIndex(ploidy, refBase, logs);
       size_t max1, max2;
       findTopTwo(genotypeLogProbs, max1, max2);
-      double logProb1 = genotypeLogProbs[max1];
-      double logProbIncRef = logProb1 - refLogProb;
+      double logProbIncRef = logs[max1] - logs[refGenotypeIndex];
       if (logProbIncRef < minLogProbIncrease) break;
-      double logProb2 = genotypeLogProbs[max2];
-      double logProbInc2nd = logProb1 - logProb2;
+      double logProbInc2nd = logs[max1] - logs[max2];
       if (logProbInc2nd < minLogProbInc2nd) break;
 
       double logProb1stFwd = strandLogProb(gcm, numOfBases, &colBases[0],
