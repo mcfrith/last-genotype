@@ -32,6 +32,12 @@ const unsigned alphLen = 4;
 const unsigned alphLen2 = alphLen * 2;
 const size_t bytesPerAlignmentColumn = 3;
 
+const int allelePercents[] =
+  {1, 2, 3, 4, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 96, 97, 98, 99};
+
+const unsigned numOfAllelePercents =
+  sizeof allelePercents / sizeof *allelePercents;
+
 struct PloidySpec {
   std::string seqNamePattern;
   unsigned ploidy;
@@ -162,7 +168,7 @@ static void ploidiesFromStrings(const const_char_p *argsBeg,
       }
       StringView s(beg, end);
       s >> spec.ploidy;
-      if(!s || !s.empty() || spec.ploidy < 1) err("bad ploidy");
+      if(!s || !s.empty()) err("bad ploidy");
       ploidies.push_back(spec);
       if (*end == 0) break;
       beg = end + 1;
@@ -218,6 +224,7 @@ static size_t homozygousIndex(unsigned ploidy, unsigned baseCode) {
 
 static size_t homozygousGenotypeIndex(unsigned ploidy, unsigned baseCode,
 				      const double *genotypeLogProbs) {
+  if (ploidy < 1) ploidy = 1;
   if (baseCode < alphLen) return homozygousIndex(ploidy, baseCode);
 
   // xxx fragile: depends on the order of dnaSymbols
@@ -230,10 +237,56 @@ static size_t homozygousGenotypeIndex(unsigned ploidy, unsigned baseCode,
   return (genotypeLogProbs[i1] < genotypeLogProbs[i2]) ? i2 : i1;
 }
 
+static void printFracGenotype(size_t genotypeNumber) {
+  if (genotypeNumber < alphLen) {
+    std::cout << dnaSymbols[genotypeNumber] << ":100";
+  } else {
+    genotypeNumber -= alphLen;
+    unsigned y = genotypeNumber / numOfAllelePercents;
+    int p = allelePercents[genotypeNumber % numOfAllelePercents];
+    int q = 100 - p;
+
+    unsigned x = 1;
+    while (y >= x) {
+      y -= x;
+      ++x;
+    }
+
+    std::cout << dnaSymbols[y] << ':' << q << ',' << dnaSymbols[x] << ':' << p;
+  }
+}
+
+static void makeFracGenotypeCalc(double baseCalcMatrix[][alphLen2],
+				 vector<double> &genotypeCalcMatrix) {
+  unsigned numOfPairedBases = 6;  // ca ga gc ta tc tg (in combinadic order)
+  unsigned numOfGenotypes = alphLen + numOfPairedBases * numOfAllelePercents;
+  genotypeCalcMatrix.resize(alphLen2 * numOfGenotypes);
+  double *mat = &genotypeCalcMatrix[0];
+
+  for (unsigned i = 0; i < alphLen; ++i) {
+    for (unsigned j = 0; j < alphLen2; ++j) {
+      *mat++ = baseCalcMatrix[i][j];
+    }
+  }
+
+  for (unsigned x = 1; x < alphLen; ++x) {  // pairs of bases
+    for (unsigned y = 0; y < x; ++y) {      // in combinadic order
+      for (unsigned i = 0; i < numOfAllelePercents; ++i) {
+	int p = allelePercents[i];
+	int q = 100 - p;
+	for (unsigned j = 0; j < alphLen2; ++j) {
+	  *mat++ = (p * baseCalcMatrix[x][j] + q * baseCalcMatrix[y][j]) / 100;
+	}
+      }
+    }
+  }
+}
+
 static void makeGenotypeCalc(double baseCalcMatrix[][alphLen2],
 			     unsigned ploidy,
 			     const vector<uchar> &genotypes,
 			     vector<double> &genotypeCalcMatrix) {
+  if (!ploidy) return makeFracGenotypeCalc(baseCalcMatrix, genotypeCalcMatrix);
   size_t numOfGenotypes = genotypes.size() / ploidy;
   genotypeCalcMatrix.resize(alphLen2 * numOfGenotypes);
   for (size_t i = 0; i < numOfGenotypes; ++i) {
@@ -1029,9 +1082,10 @@ void lastGenotype(const LastGenotypeArguments &args) {
       double logProbIncRef = logs[max1] - logs[refGenotypeIndex];
       if (logProbIncRef < minLogProbIncrease) break;
 
-      size_t max2 = indexOfSecondBiggest(logs, numOfGenotypes, max1);
+      size_t numOf2ndCandidates = ploidy ? numOfGenotypes : alphLen;
+      size_t max2 = indexOfSecondBiggest(logs, numOf2ndCandidates, max1);
       double logProbInc2nd = logs[max1] - logs[max2];
-      if (logProbInc2nd < minLogProbInc2nd) break;
+      if (ploidy && logProbInc2nd < minLogProbInc2nd) break;
 
       double logProb1stFwd = strandLogProb(gcm, numOfBases, &colBases[0],
 					   &colProbs[0], 0, max1);
@@ -1050,9 +1104,12 @@ void lastGenotype(const LastGenotypeArguments &args) {
       double logProbInc2ndRev = logProbInc2nd - logProbInc2ndFwd;
       double strandBias2nd =
 	(logProbInc2ndFwd - logProbInc2ndRev) / logProbInc2nd;
-      if (fabs(strandBias2nd) >= args.bias_2nd) break;
+      if (ploidy && fabs(strandBias2nd) >= args.bias_2nd) break;
 
-      std::memcpy(&newGenotype[0], &genotypes[max1 * ploidy], ploidy);
+      if (ploidy) {
+	std::memcpy(&newGenotype[0], &genotypes[max1 * ploidy], ploidy);
+      }
+
       double logProbIncPhase = 0;
       size_t phaseCoverage = 0;
       if (ploidy == 2 && newGenotype[0] != newGenotype[1]) {
@@ -1086,16 +1143,26 @@ void lastGenotype(const LastGenotypeArguments &args) {
       std::cout << refSeqNames[refSeqNum] << '\t'
 		<< coord << '\t'
 		<< dnaSymbols[refBase] << '\t';
-      decodeGenotype(ploidy, &newGenotype[0], &genotypeString[0]);
-      std::cout << &genotypeString[0] << '\t'
+      if (ploidy) {
+	decodeGenotype(ploidy, &newGenotype[0], &genotypeString[0]);
+	std::cout << &genotypeString[0];
+      } else {
+	printFracGenotype(max1);
+      }
+      std::cout << '\t'
 		<< (logProbIncRef / myLog(10)) << '\t'
 		<< strandBiasRef << '\t';
-      decodeGenotype(ploidy, &genotypes[max2 * ploidy], &genotypeString[0]);
-      std::cout << &genotypeString[0] << '\t'
-		<< (logProbInc2nd / myLog(10)) << '\t'
-		<< strandBias2nd << '\t';
-      std::cout << (logProbIncPhase / myLog(10)) << '\t'
-		<< phaseCoverage << '\t';
+      if (ploidy) {
+	decodeGenotype(ploidy, &genotypes[max2 * ploidy], &genotypeString[0]);
+	std::cout << &genotypeString[0];
+      } else {
+	printFracGenotype(max2);
+      }
+	std::cout << '\t'
+		  << (logProbInc2nd / myLog(10)) << '\t'
+		  << strandBias2nd << '\t';
+	std::cout << (logProbIncPhase / myLog(10)) << '\t'
+		  << phaseCoverage << '\t';
       for (size_t i = 0; i < numOfBases; ++i) {
 	if (i) std::cout << ' ';
 	std::cout << alignedBaseTexts[i].t;
