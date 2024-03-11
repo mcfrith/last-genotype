@@ -8,6 +8,7 @@
 
 #include <fnmatch.h>
 
+#include <algorithm>
 #include <cassert>
 #include <cctype>
 #include <cstdlib>  // strtod
@@ -781,16 +782,6 @@ static size_t indexOfSecondBiggest(const double *v, size_t n, size_t maxPos) {
   return j;
 }
 
-static void findTopTwo(const vector<double> &v, size_t &max1, size_t &max2) {
-  size_t s = v.size();
-  assert(s > 1);
-  max1 = 0;
-  for (size_t i = 1; i < s; ++i) {
-    if (v[i] > v[max1]) max1 = i;
-  }
-  max2 = indexOfSecondBiggest(&v[0], s, max1);
-}
-
 static size_t findPairs(const vector<AlignedBase> &x,
 			const vector<AlignedBase> &y,
 			vector<uchar> &pairBases, vector<double> &pairProbs) {
@@ -1032,11 +1023,13 @@ void lastGenotype(const LastGenotypeArguments &args) {
       double *logs = &genotypeLogProbs[0];
       calcLogProbs(numOfGenotypes, gcm, numOfBases,
 		   &colBases[0], &colProbs[0], logs);
+      size_t max1 = std::max_element(logs, logs + numOfGenotypes) - logs;
+
       size_t refGenotypeIndex = homozygousGenotypeIndex(ploidy, refBase, logs);
-      size_t max1, max2;
-      findTopTwo(genotypeLogProbs, max1, max2);
       double logProbIncRef = logs[max1] - logs[refGenotypeIndex];
       if (logProbIncRef < minLogProbIncrease) break;
+
+      size_t max2 = indexOfSecondBiggest(logs, numOfGenotypes, max1);
       double logProbInc2nd = logs[max1] - logs[max2];
       if (logProbInc2nd < minLogProbInc2nd) break;
 
