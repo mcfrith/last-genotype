@@ -702,12 +702,12 @@ static bool isAll(unsigned refBase, size_t numOfBases, const uchar *colBases) {
   return true;
 }
 
-static void calcLogProbs(const double *genotypeCalcMatrix,
+static void calcLogProbs(size_t numOfGenotypes,
+			 const double *genotypeCalcMatrix,
 			 size_t numOfBases,
 			 const uchar *colBases,
 			 const double *colProbs,
-			 vector<double> &genotypeLogProbs) {
-  size_t numOfGenotypes = genotypeLogProbs.size();
+			 double *genotypeLogProbs) {
   for (size_t i = 0; i < numOfGenotypes; ++i) {
     const double *g = &genotypeCalcMatrix[alphLen2 * i];
     double logProb = 0;
@@ -773,6 +773,14 @@ static double twoSiteLogProb(size_t numOfPairedBases,
   return logProb;
 }
 
+static size_t indexOfSecondBiggest(const double *v, size_t n, size_t maxPos) {
+  size_t j = maxPos ? 0 : 1;
+  for (size_t i = 1; i < n; ++i) {
+    if (v[i] > v[j] && i != maxPos) j = i;
+  }
+  return j;
+}
+
 static void findTopTwo(const vector<double> &v, size_t &max1, size_t &max2) {
   size_t s = v.size();
   assert(s > 1);
@@ -780,10 +788,7 @@ static void findTopTwo(const vector<double> &v, size_t &max1, size_t &max2) {
   for (size_t i = 1; i < s; ++i) {
     if (v[i] > v[max1]) max1 = i;
   }
-  max2 = max1 ? 0 : 1;
-  for (size_t i = 1; i < s; ++i) {
-    if (v[i] > v[max2] && i != max1) max2 = i;
-  }
+  max2 = indexOfSecondBiggest(&v[0], s, max1);
 }
 
 static size_t findPairs(const vector<AlignedBase> &x,
@@ -1022,10 +1027,11 @@ void lastGenotype(const LastGenotypeArguments &args) {
       size_t numOfBases = preprocessColumns(qualTable, coord, alignmentsHere,
 					    colBases, colProbs);
       if (isAll(refBase, numOfBases, &colBases[0])) break;  // makes it faster
+      size_t numOfGenotypes = genotypeLogProbs.size();
       const double *gcm = &genotypeCalcMatrix[0];
       double *logs = &genotypeLogProbs[0];
-      calcLogProbs(gcm, numOfBases,
-		   &colBases[0], &colProbs[0], genotypeLogProbs);
+      calcLogProbs(numOfGenotypes, gcm, numOfBases,
+		   &colBases[0], &colProbs[0], logs);
       size_t refGenotypeIndex = homozygousGenotypeIndex(ploidy, refBase, logs);
       size_t max1, max2;
       findTopTwo(genotypeLogProbs, max1, max2);
