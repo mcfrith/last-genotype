@@ -8,14 +8,13 @@ mcf_zstream.hh version.hh
 last-genotype: ${SRC} ${INC}
 	${CXX} ${CXXFLAGS} -o $@ ${SRC} -lz
 
-VERSION = \"`git log --oneline | grep -c .``git diff --quiet HEAD || echo +`\"
-UNKNOWN = \"UNKNOWN\"
+VERSION1 = git describe --dirty
+VERSION2 = echo '$Format:%d$ ' | sed -e 's/.*tag: *//' -e 's/[,) ].*//'
+
+VERSION = \"`test -e .git && $(VERSION1) || $(VERSION2)`\"
 
 version.hh: FORCE
-	if test -e .git ; \
-	then echo ${VERSION} | cmp -s $@ - || echo ${VERSION} > $@ ; \
-	else test -e $@ || echo ${UNKNOWN} > $@ ; \
-	fi
+	echo ${VERSION} | cmp -s $@ - || echo ${VERSION} > $@
 
 FORCE:
 
