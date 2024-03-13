@@ -32,8 +32,9 @@ const unsigned alphLen = 4;
 const unsigned alphLen2 = alphLen * 2;
 const size_t bytesPerAlignmentColumn = 3;
 
-const int allelePercents[] =
-  {1, 2, 3, 4, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 96, 97, 98, 99};
+const int allelePercents[] = {
+  1,2,3,4,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,96,97,98,99
+};
 
 const unsigned numOfAllelePercents =
   sizeof allelePercents / sizeof *allelePercents;
@@ -756,38 +757,33 @@ static bool isAll(unsigned refBase, size_t numOfBases, const uchar *colBases) {
   return true;
 }
 
-static void calcLogProbs(size_t numOfGenotypes,
-			 const double *genotypeCalcMatrix,
-			 size_t numOfBases,
-			 const uchar *colBases,
-			 const double *colProbs,
-			 double *genotypeLogProbs) {
-  for (size_t i = 0; i < numOfGenotypes; ++i) {
-    const double *g = &genotypeCalcMatrix[alphLen2 * i];
-    double logProb = 0;
-    for (size_t j = 0; j < numOfBases; ) {
-      // Tests on chimera h007:
-      // last-genotype -f1e6 -s50 lc2adbulk2-pass_2d.mat
-      //                          lc2adbulk2-pass_2d-d90-m50-j4.maf
-      // Times without batching:
-      // log10: about 12 seconds
-      // log: about 11 seconds
-      // log2: about 7.6 seconds
-      // log2f: about 6.6 seconds
-      // log1p: about 6.2 seconds
-      // log1pf: about 6.3 seconds
-      // With batching: got overflow with batchSize 256, but not 128
-      // batchSize 64 was reproducibly faster than 32
-      const unsigned batchSize = 64;
-      size_t end = std::min(j + batchSize, numOfBases);
-      double prob = 1;
-      for (; j < end; ++j) {
-	prob *= colProbs[j] * g[colBases[j]] + 1;
-      }
-      logProb += myLog(prob);  // xxx could be log 0, which should be -inf
+static double columnLogProb(size_t numOfBases,
+			    const uchar *colBases,
+			    const double *colProbs,
+			    const double *genotypeCalcVector) {
+  double logProb = 0;
+  for (size_t j = 0; j < numOfBases; ) {
+    // Tests on chimera h007:
+    // last-genotype -f1e6 -s50 lc2adbulk2-pass_2d.mat
+    //                          lc2adbulk2-pass_2d-d90-m50-j4.maf
+    // Times without batching:
+    // log10: about 12 seconds
+    // log: about 11 seconds
+    // log2: about 7.6 seconds
+    // log2f: about 6.6 seconds
+    // log1p: about 6.2 seconds
+    // log1pf: about 6.3 seconds
+    // With batching: got overflow with batchSize 256, but not 128
+    // batchSize 64 was reproducibly faster than 32
+    const unsigned batchSize = 64;
+    size_t end = std::min(j + batchSize, numOfBases);
+    double prob = 1;
+    for (; j < end; ++j) {
+      prob *= colProbs[j] * genotypeCalcVector[colBases[j]] + 1;
     }
-    genotypeLogProbs[i] = logProb;
+    logProb += myLog(prob);  // xxx could be log 0, which should be -inf
   }
+  return logProb;
 }
 
 static double strandLogProb(const double *genotypeCalcMatrix,
@@ -805,6 +801,46 @@ static double strandLogProb(const double *genotypeCalcMatrix,
     }
   }
   return logProb;
+}
+
+static void calcFracLogProbs(const double *genotypeCalcMatrix,
+			     size_t numOfBases,
+			     const uchar *colBases,
+			     const double *colProbs,
+			     double *genotypeLogProbs) {
+  int baseCounts[alphLen] = {0};
+  for (size_t i = 0; i < numOfBases; ++i) {
+    baseCounts[colBases[i] / 2] = 1;
+  }
+
+  for (unsigned i = 0; i < alphLen; ++i) {
+    *genotypeLogProbs++ =
+      columnLogProb(numOfBases, colBases, colProbs, genotypeCalcMatrix);
+    genotypeCalcMatrix += alphLen2;
+  }
+
+  for (unsigned x = 1; x < alphLen; ++x) {
+    for (unsigned y = 0; y < x; ++y) {
+      for (unsigned i = 0; i < numOfAllelePercents; ++i) {
+	*genotypeLogProbs++ = (baseCounts[x] & baseCounts[y])
+	  ? columnLogProb(numOfBases, colBases, colProbs, genotypeCalcMatrix)
+	  : -HUGE_VAL;  // try to be faster by avoiding calculation
+	genotypeCalcMatrix += alphLen2;
+      }
+    }
+  }
+}
+
+static void calcLogProbs(size_t numOfGenotypes,
+			 const double *genotypeCalcMatrix,
+			 size_t numOfBases,
+			 const uchar *colBases,
+			 const double *colProbs,
+			 double *genotypeLogProbs) {
+  for (size_t i = 0; i < numOfGenotypes; ++i) {
+    genotypeLogProbs[i] = columnLogProb(numOfBases, colBases, colProbs,
+					genotypeCalcMatrix + alphLen2 * i);
+  }
 }
 
 static double twoSiteLogProb(size_t numOfPairedBases,
@@ -1074,8 +1110,12 @@ void lastGenotype(const LastGenotypeArguments &args) {
       size_t numOfGenotypes = genotypeLogProbs.size();
       const double *gcm = &genotypeCalcMatrix[0];
       double *logs = &genotypeLogProbs[0];
-      calcLogProbs(numOfGenotypes, gcm, numOfBases,
-		   &colBases[0], &colProbs[0], logs);
+      if (ploidy) {
+	calcLogProbs(numOfGenotypes, gcm, numOfBases,
+		     &colBases[0], &colProbs[0], logs);
+      } else {  // aims to get same result as calcLogProbs, but faster:
+	calcFracLogProbs(gcm, numOfBases, &colBases[0], &colProbs[0], logs);
+      }
       size_t max1 = std::max_element(logs, logs + numOfGenotypes) - logs;
 
       size_t refGenotypeIndex = homozygousGenotypeIndex(ploidy, refBase, logs);
