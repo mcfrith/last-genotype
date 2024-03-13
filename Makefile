@@ -21,3 +21,6 @@ FORCE:
 
 clean:
 	rm -f last-genotype
+
+tag:
+	git tag -m "" `git log --oneline | grep -c .`

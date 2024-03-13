@@ -235,7 +235,7 @@ static size_t homozygousGenotypeIndex(unsigned ploidy, unsigned baseCode,
 
   size_t i1 = homozygousIndex(ploidy, baseCode1);
   size_t i2 = homozygousIndex(ploidy, baseCode2);
-  return (genotypeLogProbs[i1] < genotypeLogProbs[i2]) ? i2 : i1;
+  return (genotypeLogProbs[i1] > genotypeLogProbs[i2]) ? i2 : i1;
 }
 
 static void printFracGenotype(size_t genotypeNumber) {

@@ -275,7 +275,7 @@ blank-line-separated block of lines.
 
 The reference genome might have ambiguous bases (e.g. `W` meaning `A`
 or `T`).  In such cases, the "homozygous reference" genotype is the
-one (e.g. either `AA` or `TT`) with maximum likelihood.
+one (e.g. either `AA` or `TT`) with ~~maximum~~ minimum likelihood.
 
 Currently, `last-genotype` allows doubly-ambiguous bases but skips
 triply- and quadruply-ambiguous bases.
