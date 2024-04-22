@@ -14,6 +14,9 @@ This means that one of the (maternal and paternal) chromosomes 7 has
 `last-genotype` can also classify the reads by which (maternal or
 paternal) chromosome they are from.
 
+It works for any ploidy, or fractional genotypes (e.g. 10% A and 90%
+C at one site).
+
 # Install
 
 You need to have standard code-building tools (e.g. git & make).  You
@@ -133,6 +136,24 @@ The output ends with a line like this:
 This means that 166730 sites were covered by enough reads to have a
 possibility of achieving the log likelihood threshold.
 
+## Fractional genotypes
+
+You can predict fractional genotypes, like 20% C and 80% G at one
+site, with option `-p0`.  This may be useful for cancer or
+[heteroplasmy][].  The predicted genotype will be something like
+`C:20,T:80`.
+
+* These predicted genotypes are limited to at most 2 bases per site.
+
+* The percentages are limited to
+  `1 2 3 4 5 10 15 20 25 30 35 40 45 50 55 60 65 70 75 80 85 90 95 96 97 98 99`.
+
+* The 2nd most likely genotype (column 7) is chosen from the 100%
+  genotypes only.
+
+* The thresholds versus 2nd most likely genotype are ignored (options
+  `-M` and `-B`).
+
 ## RNA reads and pseudogenes
 
 If your reads come from RNA, `last-genotype` may make false
@@ -175,7 +196,8 @@ files, but you can measure disk usage with a command such as `df -h`.
   value as `-B`.
 
 - `-p N`, `--ploidy=N`: 1=haploid, 2=diploid, etc
-  (default=`'2,chrY*:1,chrM*:1'`).
+  (default=`'2,chrY*:1,chrM*:1'`).  As a special case, 0 means
+  fractional genotypes.
 
 - `-f BP`, `--furthest=BP`: only use query sequences with colinear
   alignments separated by <= BP.
@@ -297,10 +319,6 @@ triply- and quadruply-ambiguous bases.
   I am not sure whether or how per-base qualities should be used for
   such data.
 
-* `last-genotype` does not allow for heterogeneous samples, e.g. from
-  cancer, where one site may have, say, 27% `A` and 73% `C`.  But it
-  will often identify such sites as heterozygous, which may be useful.
-
 * Phasing (and classifying reads) is not attempted for chromosomes
   with ploidy > 2.
 
@@ -313,3 +331,5 @@ triply- and quadruply-ambiguous bases.
   (e.g. pseudo-autosomal regions).
 
 * It can't combine datasets with different substitution rates.
+
+[heteroplasmy]: https://en.wikipedia.org/wiki/Heteroplasmy

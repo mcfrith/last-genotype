@@ -77,7 +77,7 @@ Options:\n\
                             homozygous-reference genotype has magnitude < BIAS\n\
   -B BIAS, --bias-2nd=BIAS  require that the strand-bias versus the\n\
                             2nd-most-likely genotype has magnitude < BIAS\n\
-  -p N, --ploidy=N          1=haploid, 2=diploid, etc\n\
+  -p N, --ploidy=N          0=fractional; 1=haploid, 2=diploid, etc\n\
                             (default='" << args.ploidy[0] << "')\n\
   -f BP, --furthest=BP      only use query sequences with colinear alignments\n\
                             separated by <= BP\n\

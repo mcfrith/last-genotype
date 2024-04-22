@@ -13,7 +13,7 @@ Options:
                             homozygous-reference genotype has magnitude < BIAS
   -B BIAS, --bias-2nd=BIAS  require that the strand-bias versus the
                             2nd-most-likely genotype has magnitude < BIAS
-  -p N, --ploidy=N          1=haploid, 2=diploid, etc
+  -p N, --ploidy=N          0=fractional; 1=haploid, 2=diploid, etc
                             (default='2,chrY*:1,chrM*:1')
   -f BP, --furthest=BP      only use query sequences with colinear alignments
                             separated by <= BP
